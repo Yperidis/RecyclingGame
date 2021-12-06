@@ -1,0 +1,32 @@
+{{ block title }} 
+    Recycpoly 
+{{ endblock }} 
+{{ block content }} 
+
+<h2>
+    Day {{ player.round_number }} with a {{ player.role }} role.
+</h2>
+
+<p>
+    This is an economic goods game with
+    {{ Constants.players_per_group }} players per group,
+    a rate of waste item generation of {{ Constants.g }} per round-day per {{Constants.UC_role}} role,
+    and a total item storage capacity of {{ Constants.Cmax }} per {{Constants.UC_role}} or {{Constants.CH_role}}.
+</p>
+
+{{ if player.role == Constants.UC_role }}
+<img src="{{ static 'wst_mngm_demo/UC.png' }}"/>
+
+{{ elif player.role == Constants.CH_role}}
+<img src="{{ static 'wst_mngm_demo/CH.png' }}"/>
+
+{{ else }}
+<img src="{{ static 'wst_mngm_demo/RE.png' }}"/>
+
+{{ endif }}
+
+{{ formfields }}
+
+{{ next_button }} 
+
+{{ endblock }} 
