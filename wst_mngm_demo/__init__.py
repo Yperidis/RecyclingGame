@@ -51,7 +51,7 @@ class Days(Page):
     @staticmethod
     def error_message(player, actions):
         if player.role == Constants.UC_role:
-            LHS, RHS = actions['actionS'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.Cmax - player.participant.capac
+            LHS, RHS = actions['actionS'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.Cmax - player.capac
             if LHS != RHS:
                 return 'The sum of the stored items, pushed to platform and otherwise disposed must equal the generated waste items for all rounds.'
         # elif player.role == Constants.CH_role:
@@ -79,14 +79,13 @@ def creating_session(subsession):
     subsession.group_randomly(fixed_id_in_group=True)  # for grouping players randomly upon initialisation but keeping roles constant throughout the rounds    
 
     for player in players:
-        if subsession.round_number == 1 and (player.role == Constants.UC_role or player.role == Constants.CH_role):
-            player.participant.capac = Constants.Cmax  # initialise capacity
-            print(player.participant.capac, player.role, player.round_number)
-        elif subsession.round_number > 1 and (player.role == Constants.UC_role or player.role == Constants.CH_role):
-            prev_player = player.in_round(subsession.round_number - 1)
-            # print(prev_player.round_number, prev_player.role)
-            player.participant.capac = Constants.Cmax - prev_player.actionS  # calculate capacity for next round
-            print(player.participant.capac, player.role)
+        if player.round_number == 1 and (player.role == Constants.UC_role or player.role == Constants.CH_role):
+            player.capac = Constants.Cmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
+        elif player.round_number > 1 and (player.role == Constants.UC_role or player.role == Constants.CH_role):
+            prev_player = player.in_round(player.round_number - 1)
+            # print(prev_player.round_number, prev_player.role, prev_player.participant.capac, player.participant.capac, player.role)
+            player.capac = Constants.Cmax - prev_player.actionS  # calculate capacity for next round
+            print(prev_player.round_number, prev_player.role, prev_player.capac, player.capac, player.role)
 
 
 def set_payoffs(subsession):
@@ -98,21 +97,21 @@ def set_payoffs(subsession):
                 if Constants.Cmax >= Constants.g:  # check whether the capacity is greater than the waste generation 
                     if player.actionD > 0:
                         player.payoff = player.actionPP * Constants.ItemDep[wsttype] - Constants.OpTariff  # payoff formula for storing, pushing to platform and flat rate for using the stadard disposal means
-                        player.participant.capac = Constants.Cmax - player.actionS  # track the capacity in case of storage action
+                        player.capac = Constants.Cmax - player.actionS  # this is what we see at the end of round 1, i.e. the status quo for round 2 (C2 in the recursive formula)
                     else:
-                        player.payoff = player.actionPP * Constants.ItemDep[wsttype]  # payoff formula for storing and pushing to platform
-                        player.participant.capac = player.actionS  # track the capacity in case of storage action
+                        player.payoff = player.actionPP * Constants.ItemDep[wsttype]  # payoff formula without standard means disposal
+                        player.capac = Constants.Cmax - player.actionS
                 else:
-                    raise ValueError('The player generates more than they can handle.')  
+                    raise ValueError('The player generates more than they can store.')  
             else:
-                prev_player = player.in_round(subsession.round_number - 1)
-                if prev_player.participant.capac >= player.actionS:  # in case of sufficient storage
+                prev_player = player.in_round(player.round_number - 1)
+                if prev_player.capac >= player.actionS:  # in case of sufficient storage
                     if player.actionD > 0:
                         player.payoff = player.actionPP * Constants.ItemDep[wsttype] - Constants.OpTariff  # payoff formula for storing, pushing to platform and flat rate for using the stadard disposal means
-                        player.participant.capac = prev_player.participant.capac - player.actionS + player.actionPP - Constants.g + player.actionD - Constants.g  # recursive relation to track the player's item capacity
+                        player.capac = Constants.Cmax - prev_player.capac  # this is what we see at the end of round n, i.e. the status quo for round n+1 (C(n+1) in the recursive formula)
                     else:
                         player.payoff = player.actionPP * Constants.ItemDep[wsttype]  # payoff formula for storing and pushing to platform
-                        player.participant.capac = prev_player.participant.capac - player.actionS + player.actionPP - Constants.g  # recursive relation to track the player's item capacity (no stanard disposal)
+                        player.capac = Constants.Cmax - prev_player.capac  # no stanard disposal
 
 
 page_sequence = [Days, ResultsWaitPage, Results]

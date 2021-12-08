@@ -92,8 +92,8 @@ def creating_session(subsession):
             # print(player.participant.capac, player.role)
         elif subsession.round_number > 1 and (player.role == Constants.UC_role or player.role == Constants.CH_role):
             prev_player = player.in_round(subsession.round_number - 1)
-            # print(prev_player.round_number, prev_player.role)
             player.participant.capac = Constants.Cmax - prev_player.participant.capac  # calculate capacity for next round
+            print('Fuck')
 
 
 def find_match():
