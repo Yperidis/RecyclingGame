@@ -12,7 +12,7 @@
     a rate of waste item generation of {{ Constants.g }} per round-day per {{Constants.UC_role}} role,
     and a total item storage capacity of {{ Constants.Cmax }} per {{Constants.UC_role}} or {{Constants.CH_role}}.
     {{ if player.role == Constants.UC_role or player.role == Constants.CH_role }}
-        Your current capacity is {{ player.capac }}.
+        Your current capacity is {{ player.participant.capac }}.
     {{ endif }}
 </p>
 
