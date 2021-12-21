@@ -11,11 +11,13 @@ class Constants(BaseConstants):
     UC_role, CH_role, RE_role = 'UC', 'CH', 'RE'
     num_rounds = 3
     InitBalance = cu(1000)  # monetary balance (in currency units) at the start of the experiment for UCs
-    InitItems = 0  # item load upon start
     g = 5  # rate of waste (item generation per day-round)
     Cmax = 10  # maximum item storage capacity. In this rough form not taking size or weight into account Cmax>=g.
     OpTariff = cu(20)  # fee for operator waste handling
     ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
+    pUCmin = min(ItemDep.values())  # minimum price at which UC is willing to sell
+    pCHmax = max(ItemDep.values())  # maximum price at which CH is willing to buy
+    ClP = (pUCmin + pCHmax)/2  # a tentative clearing price    
 
 
 class Subsession(BaseSubsession):
@@ -30,9 +32,11 @@ class Player(BasePlayer):
     # Action set: actionS for "store", actionPP for "push on platform" and actionD for "Dispose through standard means"
     actionS = models.IntegerField(min=0, max=Constants.g, initial=0, label="How many items do you want to store?")
     actionPP = models.IntegerField(min=0, max=Constants.g+Constants.Cmax, label="How many items do you want to push to the platform?")
+    priceUC = models.CurrencyField(min=Constants.pUCmin, init=Constants.pUCmin, label="Name the price you want to sell for.")
+    priceCH = models.CurrencyField(max=Constants.pCHmax, init=Constants.pCHmax, label="Name the price you are willing to buy for.")
     actionD = models.IntegerField(min=0, max=Constants.g+Constants.Cmax, label="How many items do you want to dispose through standard means?")
-    actionFwd = models.IntegerField(min=0, label="How many items do you want to forward to another CH?")
-    actionRESell = models.IntegerField(min=0, label="How many iterms do you want to sell to an RE?")
+    actionFwd = models.IntegerField(min=0, label="How many items are you willing to forward to another CH?")
+    actionRESell = models.IntegerField(min=0, label="How many iterms are you willing to sell to an RE?")
     WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
     
 
@@ -44,9 +48,9 @@ class Days(Page):
     @staticmethod
     def get_form_fields(player):
         if player.role == Constants.UC_role:
-            return ['actionS', 'actionPP', 'actionD', 'WstType']
-        elif player.role == Constants.CH_role and player.round_number > 1:
-            return ['actionS', 'actionFwd', 'actionRESell', 'WstType']
+            return ['actionS', 'actionPP', 'priceUC', 'actionD', 'WstType']
+        elif player.role == Constants.CH_role:
+            return ['actionS', 'actionFwd', 'actionRESell', 'priceCH', 'WstType']
 
     @staticmethod
     def error_message(player, actions):
@@ -86,21 +90,25 @@ def creating_session(subsession):
             player.participant.capac = Constants.Cmax - prev_player.actionS  # calculate capacity for next round
 
 
-def set_payoffs(subsession):
-    players = subsession.get_players()
+def Trading(players): 
     for player in players:
         next_player = player.in_round(player.round_number + 1)
         if player.role == Constants.UC_role:
             wsttype = player.WstType  # the specified item to be exchanged TODO: check whether it's in the constant list
-            if player.participant.capac >= Constants.g:    
+            if player.participant.capac >= Constants.g:
                 if player.actionD > 0:
-                    player.payoff = player.actionPP * Constants.ItemDep[wsttype] - Constants.OpTariff  # payoff formula for storing, pushing to platform and flat rate for using the stadard disposal means
-                    next_player.participant.capac = Constants.Cmax - player.actionS  # this is what we see at the end of round 1, i.e. the status quo for round 2 (C2 in the recursive formula)
+                    player.payoff = player.actionPP * Constants.ClP - Constants.OpTariff  # payoff formula for storing, pushing to platform and flat rate for using the stadard disposal means
+                    next_player.participant.capac = Constants.Cmax - player.actionS  # recurisve calculation for capacity
                 else:
-                    player.payoff = player.actionPP * Constants.ItemDep[wsttype]  # payoff formula without standard means disposal
+                    player.payoff = player.actionPP * Constants.ClP  # payoff formula without standard means disposal
                     next_player.participant.capac = Constants.Cmax - player.actionS
             else:
                 raise ValueError('The player generates more than they can store. Fix capacity against waste generation.')  
+
+
+def set_payoffs(subsession):
+    players = subsession.get_players()
+    # TODO Write the matching mechanism, when trading takes place and the alternatives
 
 
 page_sequence = [Days, ResultsWaitPage, Results]
