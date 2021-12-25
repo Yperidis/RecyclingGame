@@ -1,4 +1,5 @@
 from otree.api import *
+from .payoffs import *
 
 
 doc = """
@@ -30,13 +31,13 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):  
     # Action set: actionS for "store", actionPP for "push on platform" and actionD for "Dispose through standard means"
-    actionS = models.IntegerField(min=0, max=Constants.g, initial=0, label="How many items do you want to store?")
-    actionPP = models.IntegerField(min=0, max=Constants.g+Constants.Cmax, label="How many items do you want to push to the platform?")
-    priceUC = models.CurrencyField(min=Constants.pUCmin, init=Constants.pUCmin, label="Name the price you want to sell for.")
-    priceCH = models.CurrencyField(max=Constants.pCHmax, init=Constants.pCHmax, label="Name the price you are willing to buy for.")
-    actionD = models.IntegerField(min=0, max=Constants.g+Constants.Cmax, label="How many items do you want to dispose through standard means?")
-    actionFwd = models.IntegerField(min=0, label="How many items are you willing to forward to another CH?")
-    actionRESell = models.IntegerField(min=0, label="How many iterms are you willing to sell to an RE?")
+    actionS = models.IntegerField(min=0, max=Constants.Cmax, initial=0, label="How many items are you willing to store?")
+    actionPP = models.IntegerField(min=0, max=Constants.g+Constants.Cmax, label="How many items are you willing to push to the platform?")
+    priceUC = models.CurrencyField(min=0, init=Constants.pUCmin, label="Name the price you want to sell for.")
+    priceCH = models.CurrencyField(init=Constants.pCHmax, label="Name the price you are willing to buy for.")
+    actionD = models.IntegerField(min=0, max=Constants.g+Constants.Cmax, label="How many items are you willing to dispose through standard means?")
+    actionFwd = models.IntegerField(min=0, max=Constants.Cmax, label="How many items are you willing to forward to another CH?")
+    actionRESell = models.IntegerField(min=0, max=Constants.Cmax, label="How many iterms are you willing to sell to an RE?")
     WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
     
 
@@ -58,14 +59,11 @@ class Days(Page):
             LHS, RHS = actions['actionS'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.Cmax - player.participant.capac
             if LHS != RHS:
                 return 'The sum of the stored items, pushed to platform and otherwise disposed must equal the generated waste items minus the current capacity for all rounds.'
-        # elif player.role == Constants.CH_role:
-        #     if player.round_number == 1:
-        #         return 'Initializing. Nothing to forward or sell yet.'
-        #     else:
-        #         LHS = actions['actionS'] + actions['actionFwd'] + actions['actionRESell']
-        #         RHS = actions['actionPP'] + Constants.Cmax #- player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
-        #         if LHS != RHS:  # what a CH forwards or sells cannot be more than what they can carry and what they already have in store
-        #             return 'You cannot forward to another CH or sell to an RE more than you have.'
+        elif player.role == Constants.CH_role:
+            LHS = actions['actionS']
+            RHS = player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
+            if LHS > RHS:  # what a CH forwards or sells cannot be more than what they can carry and what they already have in store
+                return 'You cannot store more than you can carry.'
 
 
 class ResultsWaitPage(WaitPage):
@@ -87,28 +85,31 @@ def creating_session(subsession):
             player.participant.capac = Constants.Cmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
         elif player.round_number > 1 and (player.role == Constants.UC_role or player.role == Constants.CH_role):
             prev_player = player.in_round(player.round_number - 1)
-            player.participant.capac = Constants.Cmax - prev_player.actionS  # calculate capacity for next round
+            player.participant.capac = Constants.Cmax - prev_player.actionS  # initialise capacity for next round
 
 
-def Trading(players): 
-    for player in players:
-        next_player = player.in_round(player.round_number + 1)
-        if player.role == Constants.UC_role:
-            wsttype = player.WstType  # the specified item to be exchanged TODO: check whether it's in the constant list
-            if player.participant.capac >= Constants.g:
-                if player.actionD > 0:
-                    player.payoff = player.actionPP * Constants.ClP - Constants.OpTariff  # payoff formula for storing, pushing to platform and flat rate for using the stadard disposal means
-                    next_player.participant.capac = Constants.Cmax - player.actionS  # recurisve calculation for capacity
-                else:
-                    player.payoff = player.actionPP * Constants.ClP  # payoff formula without standard means disposal
-                    next_player.participant.capac = Constants.Cmax - player.actionS
-            else:
-                raise ValueError('The player generates more than they can store. Fix capacity against waste generation.')  
-
+def NoTrading():
+    pass
 
 def set_payoffs(subsession):
     players = subsession.get_players()
+    UCplayers = [ player.role for player in players if player.role == Constants.UC_role ]
+    CHplayers = [ player.role for player in players if player.role == Constants.CH_role ]
+    # Done = True
+    # while Done:
+    #     for UC in UCplayers:
+    #         for CH in CHplayers:
+    #             if UC.priceUC <= CH.priceCH:
+    #                 Q = min(UC.actionPP, CH.actionS+CH.actionFwd+CH.actionRESell)
+    #                 TradingUC(UC), TradingCH(CH)  # the trade and goods exchange for the pair UC-CH
+    #                 CHplayers.remove(CH)  # CH is no more available to pair with a UC
+    #                 break
+    #             else:
+    #                 NoTradingUC(UC)
+    #     for CH in CHplayers:
+    #         NoTradingCH(CH)
     # TODO Write the matching mechanism, when trading takes place and the alternatives
+    Trading(players, Constants.UC_role, Constants.g, Constants.ClP, Constants.OpTariff, Constants.Cmax)
 
 
 page_sequence = [Days, ResultsWaitPage, Results]

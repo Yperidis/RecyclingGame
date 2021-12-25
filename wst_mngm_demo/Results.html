@@ -12,7 +12,7 @@
         {{player.actionD}} items. Your payoff for this round was {{ player.payoff }} and your current capacity is 
         {{player.participant.capac}}.
     </p>
-{{ elif player.role == Constants.CH_role and player.round_number > 1 }}
+{{ elif player.role == Constants.CH_role }}
     <p>
         You started with a balance of {{ Constants.InitBalance }} and in the current round ({{player.round_number}})
         stored {{player.actionS}}, forwarded to another CH {{player.actionFwd}} and sold to an RE {{player.actionRESell}} items. 
