@@ -10,5 +10,5 @@ def creating_session(subsession):
             print(player.participant.capac)
         elif subsession.round_number > 1 and player.role == Constants.UC_role and player.role == Constants.CH_role:
             prev_player = player.in_round(subsession.round_number - 1)
-            player.participant.capac = Constants.Cmax - prev_player.actionS  # this is to maintain the capacity over all rounds
+            player.participant.capac = Constants.Cmax - prev_player.actionSUC  # this is to maintain the capacity over all rounds
 
