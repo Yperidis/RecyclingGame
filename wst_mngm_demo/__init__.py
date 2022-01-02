@@ -1,5 +1,6 @@
 from otree.api import *
 from .payoffs import *
+from .utils import *
 
 
 doc = """
@@ -48,6 +49,7 @@ class Days(Page):
     form_model = 'player'
     # form_fields = ['actionSUC', 'actionPP', 'actionD', 'WstType']  # the action set
 
+
     @staticmethod
     def get_form_fields(player):
         if player.role == Constants.UC_role:
@@ -55,8 +57,10 @@ class Days(Page):
         elif player.role == Constants.CH_role:
             return ['actionSCH', 'actionFwd', 'actionRESell', 'priceCH', 'WstType']
 
+
     @staticmethod
     def error_message(player, actions):
+        # PlayerFormValidation(player, actions, Constants.UC_role, Constants.CH_role, Constants.CHCmax, Constants.g, Constants.UCCmax)
         if player.role == Constants.UC_role:
             LHS, RHS = actions['actionSUC'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.UCCmax - player.participant.capac
             if LHS != RHS:
@@ -72,6 +76,15 @@ class Days(Page):
             if RHS2 > 0 or RHS3 > 0:
                 if LHS2 < RHS2 + RHS3:
                     return 'You cannot forward or sell more than you have in store.'
+
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):  # function for recording the players' arrival times at the wait pages
+        participant = player.participant
+
+        import time
+
+        participant.wait_page_arrival = time.time()
 
 
 class ResultsWaitPage(WaitPage):
@@ -93,28 +106,16 @@ def creating_session(subsession):
             player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
 
 
-def NoTrading():
-    pass
-
 def set_payoffs(subsession):
     players = subsession.get_players()
     UCplayers = [ player.role for player in players if player.role == Constants.UC_role ]
     CHplayers = [ player.role for player in players if player.role == Constants.CH_role ]
+    wait_page_arrival_times = { player.id_in_group : player.participant.wait_page_arrival for player in players }
     # Done = True
     # while Done:
-    #     for UC in UCplayers:
-    #         for CH in CHplayers:
-    #             if UC.priceUC <= CH.priceCH:
-    #                 Q = min(UC.actionPP, CH.actionSUC+CH.actionFwd+CH.actionRESell)
-    #                 TradingUC(UC), TradingCH(CH)  # the trade and goods exchange for the pair UC-CH
-    #                 CHplayers.remove(CH)  # CH is no more available to pair with a UC
-    #                 break
-    #             else:
-    #                 NoTradingUC(UC)
-    #     for CH in CHplayers:
-    #         NoTradingCH(CH)
     # TODO Write the matching mechanism, when trading takes place and the alternatives
     Trading(players, Constants.UC_role, Constants.g, Constants.ClP, Constants.OpTariff, Constants.UCCmax)
+
 
 
 page_sequence = [Days, ResultsWaitPage, Results]

@@ -1,14 +1,16 @@
-def creating_session(subsession):
-    new_structure = [list(range(1,Constants.players_per_group+1))]  # prerequisite to set the number of players in a tabular structure for grouping purposes
-    subsession.set_group_matrix(new_structure)
-    players = subsession.get_players()
-    subsession.group_randomly()  # for grouping players randomly in each round    
-
-    for player in players:
-        if subsession.round_number == 1 and player.role == Constants.UC_role and player.role == Constants.CH_role:
-            player.participant.capac = Constants.Cmax  # this is to maintain the capacity over all rounds
-            print(player.participant.capac)
-        elif subsession.round_number > 1 and player.role == Constants.UC_role and player.role == Constants.CH_role:
-            prev_player = player.in_round(subsession.round_number - 1)
-            player.participant.capac = Constants.Cmax - prev_player.actionSUC  # this is to maintain the capacity over all rounds
-
+def PlayerFormValidation(player, actions, CUC, CCH, CCHCmax, Cg, CUCCmax):
+    if player.role == CUC:
+        LHS, RHS = actions['actionSUC'] + actions['actionPP'] + actions['actionD'], Cg + CUCCmax - player.participant.capac
+        if LHS != RHS:
+            return 'The sum of the stored items, pushed to platform and otherwise disposed must equal the generated waste items minus the current capacity for all rounds.'
+    elif player.role == CCH:
+        LHS1 = actions['actionSCH']
+        RHS1 = player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
+        RHS2 = actions['actionFwd']  
+        RHS3 = actions['actionRESell']
+        LHS2 = CCHCmax - RHS1
+        if LHS1 > RHS1:
+            return 'You cannot store more than you can carry.'
+        if RHS2 > 0 or RHS3 > 0:
+            if LHS2 < RHS2 + RHS3:
+                return 'You cannot forward or sell more than you have in store.'
