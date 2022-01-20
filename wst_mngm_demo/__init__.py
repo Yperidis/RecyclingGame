@@ -1,6 +1,6 @@
 from otree.api import *
 from .payoffs import *
-from .utils import *
+# from .utils import *
 
 
 doc = """
@@ -36,8 +36,8 @@ class Player(BasePlayer):
     actionSUC = models.IntegerField(min=0, max=Constants.UCCmax, initial=0, label="How many items are you willing to store?")
     actionSCH = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to store?")
     actionPP = models.IntegerField(min=0, max=Constants.g+Constants.UCCmax, label="How many items are you willing to push to the platform?")
-    priceUC = models.CurrencyField(min=0, init=Constants.pUCmin, label="Name the price you want to sell for.")
-    priceCH = models.CurrencyField(init=Constants.pCHmax, label="Name the price you are willing to buy for.")
+    priceUC = models.CurrencyField(min=Constants.pUCmin, init=Constants.pUCmin, label="Name the price you want to sell for.")
+    priceCH = models.CurrencyField(min=0, max=Constants.pCHmax, init=Constants.pCHmax, label="Name the price you are willing to buy for.")
     actionD = models.IntegerField(min=0, max=Constants.g+Constants.UCCmax, label="How many items are you willing to dispose through standard means?")
     actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, label="How many iterms are you willing to sell to an RE?")
@@ -104,15 +104,32 @@ def creating_session(subsession):
     for player in players:
         if player.role == Constants.UC_role or player.role == Constants.CH_role:
             player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
+            player.participant.traded = 0  # initialization for a flag on whether the PP action has been spent during the payoff process
 
 
 def set_payoffs(subsession):
     players = subsession.get_players()
-    UCplayers = [ player.role for player in players if player.role == Constants.UC_role ]
-    CHplayers = [ player.role for player in players if player.role == Constants.CH_role ]
-    wait_page_arrival_times = { player.id_in_group : player.participant.wait_page_arrival for player in players }
-    # Done = True
-    # while Done:
+    wpatUC = { player : player.participant.wait_page_arrival for player in players if player.role == Constants.UC_role }  # dictionary of player ID-wait page arrival time 
+    wpatCH = { player : player.participant.wait_page_arrival for player in players if player.role == Constants.CH_role }
+    UCWTsort, CHWTsort = sorted( zip( wpatUC.keys(), wpatUC.values()), key=lambda pair : pair[1] ), sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] )  # sort UC and CH IDs following their waiting time ascending sorting
+    # print(UCIDWTsort, CHIDWTsort)
+    for UCplayer in UCWTsort:  # "first come" UC order
+        for CHplayer in CHWTsort:  # "first come" CH order
+            if UCplayer.priceUC <= CHplayer.priceCH:  # condition for the trade to take place
+                if CHplayer.participant.traded == 0:  # if the demand of the CH in question is non-zero
+                    # PPTrade()
+                    pass  #TODO TRADE
+                    if UCplayer.participant.traded == 1:  # if the supply of the UC in question has been spent proceed to the next UC
+                        break
+                else:  # if the demand of the CH in question is zero proceed to the next CH
+                    continue
+            else:  # no trade takes place for the given pair. Proceed to the next CH.
+                continue
+        if UCplayer.actionD > 0:  # calculate the costs of the standard disposal
+            pass
+            # Dispose()
+        
+
     # TODO Write the matching mechanism, when trading takes place and the alternatives
     Trading(players, Constants.UC_role, Constants.g, Constants.ClP, Constants.OpTariff, Constants.UCCmax)
 
