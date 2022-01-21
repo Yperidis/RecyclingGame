@@ -112,13 +112,23 @@ def set_payoffs(subsession):
     wpatUC = { player : player.participant.wait_page_arrival for player in players if player.role == Constants.UC_role }  # dictionary of player ID-wait page arrival time 
     wpatCH = { player : player.participant.wait_page_arrival for player in players if player.role == Constants.CH_role }
     UCWTsort, CHWTsort = sorted( zip( wpatUC.keys(), wpatUC.values()), key=lambda pair : pair[1] ), sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] )  # sort UC and CH IDs following their waiting time ascending sorting
-    # print(UCIDWTsort, CHIDWTsort)
     for UCplayer in UCWTsort:  # "first come" UC order
+        next_UCplayer = UCplayer.in_round(UCplayer.round_number + 1)
         for CHplayer in CHWTsort:  # "first come" CH order
+            next_CHplayer = CHplayer.in_round(CHplayer.round_number + 1)
+            next_UCplayer.participant.capac = Constants.UCCmax - UCplayer.actionSUC  # UC recursive capacity relation
+            next_CHplayer.participant.capac = Constants.CHCmax - CHplayer.actionSCH  # CH recursive capacity relation
             if UCplayer.priceUC <= CHplayer.priceCH:  # condition for the trade to take place
                 if CHplayer.participant.traded == 0:  # if the demand of the CH in question is non-zero
                     # PPTrade()
-                    pass  #TODO TRADE
+                    if UCplayer.actionPP <= CHplayer.actionSCH:
+                        UCplayer.participant.traded == 1  # signal that the supply of the UC has been satisfied by the amount the CH is willing to store (local demand)
+                        UCplayer.payoff = UCplayer.actionPP * Constants.ClP
+                        CHplayer.payoff = -UCplayer.actionPP * Constants.ClP
+                    else:  # partial fulfillment of UC supply from available demand (CH)
+                        CHplayer.participant.traded == 1  # signal that the demand of the CH has been satisfied by the amount the UC is willing to sell (local supply)
+                        UCplayer.payoff = CHplayer.actionSCH * Constants.ClP
+                        CHplayer.payoff = -CHplayer.actionSCH * Constants.ClP
                     if UCplayer.participant.traded == 1:  # if the supply of the UC in question has been spent proceed to the next UC
                         break
                 else:  # if the demand of the CH in question is zero proceed to the next CH
@@ -126,8 +136,8 @@ def set_payoffs(subsession):
             else:  # no trade takes place for the given pair. Proceed to the next CH.
                 continue
         if UCplayer.actionD > 0:  # calculate the costs of the standard disposal
-            pass
             # Dispose()
+            UCplayer.payoff += -Constants.OpTariff  # add the standard disposal tariff to the UC payoff
         
 
     # TODO Write the matching mechanism, when trading takes place and the alternatives

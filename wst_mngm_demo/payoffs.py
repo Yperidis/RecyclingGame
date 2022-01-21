@@ -12,3 +12,11 @@ def Trading(players, CUCr, Cg, CClp, COpT, UCCmax):
                     next_player.participant.capac = UCCmax - player.actionSUC
             else:
                 raise ValueError('The player generates more than they can store. Fix capacity against waste generation.')
+
+
+def Dispose():
+    pass
+
+
+def PPTrade():
+    pass 
