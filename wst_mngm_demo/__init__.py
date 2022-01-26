@@ -103,46 +103,16 @@ def creating_session(subsession):
 
     for player in players:
         if player.role == Constants.UC_role or player.role == Constants.CH_role:
-            player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
-            player.participant.traded = 0  # initialization for a flag on whether the PP action has been spent during the payoff process
+            if player.role == Constants.UC_role:
+                player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
+            else:
+                player.participant.capac = Constants.CHCmax
+            player.participant.traded = 0  # initialization for a flag on whether the PP or the SCH action has been spent during the payoff process
 
 
 def set_payoffs(subsession):
     players = subsession.get_players()
-    wpatUC = { player : player.participant.wait_page_arrival for player in players if player.role == Constants.UC_role }  # dictionary of player ID-wait page arrival time 
-    wpatCH = { player : player.participant.wait_page_arrival for player in players if player.role == Constants.CH_role }
-    UCWTsort, CHWTsort = sorted( zip( wpatUC.keys(), wpatUC.values()), key=lambda pair : pair[1] ), sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] )  # sort UC and CH IDs following their waiting time ascending sorting
-    for UCplayer in UCWTsort:  # "first come" UC order
-        next_UCplayer = UCplayer.in_round(UCplayer.round_number + 1)
-        for CHplayer in CHWTsort:  # "first come" CH order
-            next_CHplayer = CHplayer.in_round(CHplayer.round_number + 1)
-            next_UCplayer.participant.capac = Constants.UCCmax - UCplayer.actionSUC  # UC recursive capacity relation
-            next_CHplayer.participant.capac = Constants.CHCmax - CHplayer.actionSCH  # CH recursive capacity relation
-            if UCplayer.priceUC <= CHplayer.priceCH:  # condition for the trade to take place
-                if CHplayer.participant.traded == 0:  # if the demand of the CH in question is non-zero
-                    # PPTrade()
-                    if UCplayer.actionPP <= CHplayer.actionSCH:
-                        UCplayer.participant.traded == 1  # signal that the supply of the UC has been satisfied by the amount the CH is willing to store (local demand)
-                        UCplayer.payoff = UCplayer.actionPP * Constants.ClP
-                        CHplayer.payoff = -UCplayer.actionPP * Constants.ClP
-                    else:  # partial fulfillment of UC supply from available demand (CH)
-                        CHplayer.participant.traded == 1  # signal that the demand of the CH has been satisfied by the amount the UC is willing to sell (local supply)
-                        UCplayer.payoff = CHplayer.actionSCH * Constants.ClP
-                        CHplayer.payoff = -CHplayer.actionSCH * Constants.ClP
-                    if UCplayer.participant.traded == 1:  # if the supply of the UC in question has been spent proceed to the next UC
-                        break
-                else:  # if the demand of the CH in question is zero proceed to the next CH
-                    continue
-            else:  # no trade takes place for the given pair. Proceed to the next CH.
-                continue
-        if UCplayer.actionD > 0:  # calculate the costs of the standard disposal
-            # Dispose()
-            UCplayer.payoff += -Constants.OpTariff  # add the standard disposal tariff to the UC payoff
-        
-
-    # TODO Write the matching mechanism, when trading takes place and the alternatives
-    Trading(players, Constants.UC_role, Constants.g, Constants.ClP, Constants.OpTariff, Constants.UCCmax)
-
+    UCPayoffnRest(players, Constants.UC_role, Constants.CH_role, Constants.UCCmax, Constants.CHCmax, Constants.ClP, Constants.OpTariff)
 
 
 page_sequence = [Days, ResultsWaitPage, Results]
