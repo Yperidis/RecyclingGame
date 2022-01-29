@@ -9,11 +9,11 @@
 
 <p>
     This is an economic goods game with {{ Constants.players_per_group }} players per group,
-    a rate of waste item generation of {{ Constants.g }} per round-day per {{Constants.UC_role}} role,
-    and a total item storage capacity of {{ Constants.UCCmax }} per {{Constants.UC_role}} or {{ Constants.CHCmax }} 
-    per {{Constants.CH_role}}.
-    {{ if player.role == Constants.UC_role or player.role == Constants.CH_role }}
-        {{ if player.role == Constants.UC_role }}
+    a rate of waste item generation of {{ Constants.g }} per round-day per {{'UC'}} role,
+    and a total item storage capacity of {{ Constants.UCCmax }} per {{'UC'}} or {{ Constants.CHCmax }} 
+    per {{'CH'}}.
+    {{ if player.role == 'UC' or player.role == 'CH' }}
+        {{ if player.role == 'UC' }}
             Your current capacity is {{ player.participant.capac }}.
         {{ else }}
             Your current capacity is {{ player.participant.capac }}.
@@ -21,14 +21,12 @@
     {{ endif }}
 </p>
 
-{{ if player.role == Constants.UC_role }}
+{{ if player.role == 'UC' }}
 <img src="{{ static 'wst_mngm_demo/UC.png' }}"/>
 
-{{ elif player.role == Constants.CH_role}}
+{{ elif player.role == 'CH'}}
 <img src="{{ static 'wst_mngm_demo/CH.png' }}"/>
 
-{{ else }}
-<img src="{{ static 'wst_mngm_demo/RE.png' }}"/>
 
 {{ endif }}
 

@@ -5,21 +5,20 @@
 {{ block content }}
 
 
-{{ if player.role == Constants.UC_role }}
+{{ if player.role == 'UC' }}
     <p>
         You started with a balance of {{ Constants.InitBalance }} and in the current round ({{player.round_number}})
         stored {{player.actionSUC}}, tried to push to platform {{player.actionPP}} and disposed willingly in the standard manner 
         {{player.actionD}} items. Your payoff for this round was {{ player.payoff }} and your current capacity is 
         {{player.participant.capac}}.
     </p>
-{{ elif player.role == Constants.CH_role }}
+{{ elif player.role == 'CH' }}
     <p>
         You started with a balance of {{ Constants.InitBalance }} and in the current round ({{player.round_number}})
-        stored {{player.actionSCH}}, forwarded to another CH {{player.actionFwd}} and sold to an RE {{player.actionRESell}} items. 
+        stored {{player.actionBCH}}, forwarded to another CH {{player.actionFwd}} and sold to an RE {{player.actionRESell}} items. 
         Your payoff for this round was {{ player.payoff }} and your current capacity is {{player.participant.capac}}.
     </p>
-{{ else }}
-    You might have bought some items.
+
 {{ endif }}
 
 

@@ -7,18 +7,18 @@ def UCPayoffnRest(players, ConstantsUC_role, ConstantsCH_role, ConstantsUCCmax, 
         next_UCplayer.participant.capac = ConstantsUCCmax - UCplayer[0].actionSUC  # UC recursive capacity relation
         for CHplayer in CHWTsort:  # "first come" CH order
             next_CHplayer = CHplayer[0].in_round(CHplayer[0].round_number + 1)
-            next_CHplayer.participant.capac = ConstantsCHCmax - CHplayer[0].actionSCH  # CH recursive capacity relation
+            next_CHplayer.participant.capac = ConstantsCHCmax - CHplayer[0].actionBCH  # CH recursive capacity relation
             if UCplayer[0].priceUC <= CHplayer[0].priceCH:  # condition for the trade to take place
                 if CHplayer[0].participant.traded == 0:  # if the demand of the CH in question is non-zero
                     # PPTrade()
-                    if UCplayer[0].actionPP <= CHplayer[0].actionSCH:  # check the relationship between the UC offer and the CH demand
+                    if UCplayer[0].actionPP <= CHplayer[0].actionBCH:  # check the relationship between the UC offer and the CH demand
                         UCplayer[0].participant.traded == UCplayer[0].actionPP  # signal that the offer of the UC has been satisfied by the amount the CH is willing to store (local demand)
                         UCplayer[0].payoff = UCplayer[0].actionPP * ConstantsClP  # pay per the UC PP quantity
                         CHplayer[0].payoff = -UCplayer[0].actionPP * ConstantsClP
                     else:  # partial fulfillment of UC offer from available demand (CH)
-                        CHplayer[0].participant.traded == CHplayer[0].actionSCH  # signal that the offer of the CH has been satisfied by the amount the UC is willing to sell (local supply)
-                        UCplayer[0].payoff = CHplayer[0].actionSCH * ConstantsClP  # pay per the CH stor quantity
-                        CHplayer[0].payoff = -CHplayer[0].actionSCH * ConstantsClP
+                        CHplayer[0].participant.traded == CHplayer[0].actionBCH  # signal that the offer of the CH has been satisfied by the amount the UC is willing to sell (local supply)
+                        UCplayer[0].payoff = CHplayer[0].actionBCH * ConstantsClP  # pay per the CH stor quantity
+                        CHplayer[0].payoff = -CHplayer[0].actionBCH * ConstantsClP
                     if UCplayer[0].participant.traded == 1:  # if the offer of the UC in question has been spent proceed to the next UC
                         break
                 else:  # if the demand of the CH in question is zero proceed to the next CH
