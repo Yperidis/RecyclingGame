@@ -4,7 +4,7 @@
 {{ block content }} 
 
 <h2>
-    Day {{ player.round_number }} with a {{ player.role }} role.
+    Day {{ player.round_number }} with a {{ player.role_own }} role.
 </h2>
 
 <p>
@@ -12,8 +12,8 @@
     a rate of waste item generation of {{ Constants.g }} per round-day per {{'UC'}} role,
     and a total item storage capacity of {{ Constants.UCCmax }} per {{'UC'}} or {{ Constants.CHCmax }} 
     per {{'CH'}}.
-    {{ if player.role == 'UC' or player.role == 'CH' }}
-        {{ if player.role == 'UC' }}
+    {{ if player.role_own == 'UC' or player.role_own == 'CH' }}
+        {{ if player.role_own == 'UC' }}
             Your current capacity is {{ player.participant.capac }}.
         {{ else }}
             Your current capacity is {{ player.participant.capac }}.
@@ -21,10 +21,10 @@
     {{ endif }}
 </p>
 
-{{ if player.role == 'UC' }}
+{{ if player.role_own == 'UC' }}
 <img src="{{ static 'wst_mngm_demo/UC.png' }}"/>
 
-{{ elif player.role == 'CH'}}
+{{ elif player.role_own == 'CH'}}
 <img src="{{ static 'wst_mngm_demo/CH.png' }}"/>
 
 

@@ -33,7 +33,7 @@ from os import environ
 SESSION_CONFIGS = [
     dict(
         name='wst_mngm_demo',
-        num_demo_participants=3,
+        num_demo_participants=5,
         app_sequence=['wst_mngm_demo']
     ),
 ]

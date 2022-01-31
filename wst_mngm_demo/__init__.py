@@ -9,7 +9,7 @@ Your app description
 
 class Constants(BaseConstants):
     name_in_url = 'waste_management_demo'
-    players_per_group = 3
+    players_per_group = 5
     # UC_role, CH_role, RE_role = 'UC', 'CH', 'RE'
     num_rounds = 3
     InitBalance = cu(1000)  # monetary balance (in currency units) at the start of the experiment for UCs
@@ -32,16 +32,7 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    def role(self):  # modify depending on the desired distribution of UCs and CHs
-        roles = ['UC', 'CH', 'RE']
-        num_UCCH = len(roles)-1
-        if self.id_in_group == 1:
-            return roles[2]
-        if self.id_in_group % num_UCCH == 1:
-            return roles[0]
-        if self.id_in_group % num_UCCH == 0:
-            return roles[1]
-
+    role_own = models.StringField()
 
     # Action set: actionSUC for "store", actionPP for "push on platform" and actionD for "Dispose through standard means"
     actionSUC = models.IntegerField(min=0, max=Constants.UCCmax, initial=0, label="How many items are you willing to store?")
@@ -63,20 +54,20 @@ class Days(Page):
 
     @staticmethod
     def get_form_fields(player):
-        if player.role == 'UC':
+        if player.role_own == 'UC':
             return ['actionSUC', 'actionPP', 'priceUC', 'actionD', 'WstType']
-        elif player.role == 'CH':
+        elif player.role_own == 'CH':
             return ['actionBCH', 'actionFwd', 'actionRESell', 'priceCH', 'WstType']
 
 
     @staticmethod
     def error_message(player, actions):
         # PlayerFormValidation(player, actions, Constants.UC_role, Constants.CH_role, Constants.CHCmax, Constants.g, Constants.UCCmax)
-        if player.role == 'UC':
+        if player.role_own == 'UC':
             LHS, RHS = actions['actionSUC'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.UCCmax - player.participant.capac
             if LHS != RHS:
                 return 'The sum of the stored items, pushed to platform and otherwise disposed must equal the generated waste items minus the current capacity for all rounds.'
-        elif player.role == 'CH':
+        elif player.role_own == 'CH':
             LHS1 = actions['actionBCH']
             RHS1 = player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
             RHS2 = actions['actionFwd']  
@@ -111,10 +102,18 @@ def creating_session(subsession):
     subsession.set_group_matrix(new_structure)
     players = subsession.get_players()
     subsession.group_randomly(fixed_id_in_group=True)  # for grouping players randomly upon initialisation but keeping roles constant throughout the rounds    
+    roles = ['UC', 'CH', 'RE']
+    num_UCCH = len(roles) - 1
 
     for player in players:
-        if player.role == 'UC' or player.role == 'CH':
-            if player.role == 'UC':
+        if player.id_in_group == 1:
+            player.role_own = roles[2]
+        elif player.id_in_group % num_UCCH == 1:
+            player.role_own = roles[0]
+        else:
+            player.role_own = roles[1]
+        if player.role_own == 'UC' or player.role_own == 'CH':
+            if player.role_own == 'UC':
                 player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
             else:
                 player.participant.capac = Constants.CHCmax

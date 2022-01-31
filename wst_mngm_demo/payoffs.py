@@ -1,6 +1,6 @@
-def UCPayoffnRest(players, ConstantsUC_role, ConstantsCH_role, ConstantsUCCmax, ConstantsCHCmax, ConstantsClP, ConstantsOpTariff):
-    wpatUC = { player : player.participant.wait_page_arrival for player in players if player.role == ConstantsUC_role }  # dictionary of player ID-wait page arrival time 
-    wpatCH = { player : player.participant.wait_page_arrival for player in players if player.role == ConstantsCH_role }
+def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, ConstantsClP, ConstantsOpTariff):
+    wpatUC = { player : player.participant.wait_page_arrival for player in players if player.role_own == UC_role }  # dictionary of player ID-wait page arrival time
+    wpatCH = { player : player.participant.wait_page_arrival for player in players if player.role_own == CH_role }
     UCWTsort, CHWTsort = sorted( zip( wpatUC.keys(), wpatUC.values()), key=lambda pair : pair[1] ), sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] )  # sort UC and CH IDs following their waiting time ascending sorting
     for UCplayer in UCWTsort:  # "first come" UC order
         next_UCplayer = UCplayer[0].in_round(UCplayer[0].round_number + 1)
