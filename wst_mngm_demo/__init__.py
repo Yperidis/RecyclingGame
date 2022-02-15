@@ -9,7 +9,7 @@ Your app description
 
 class Constants(BaseConstants):
     name_in_url = 'waste_management_demo'
-    players_per_group = 5
+    players_per_group = 3
     # UC_role, CH_role, RE_role = 'UC', 'CH', 'RE'
     num_rounds = 3
     InitBalance = cu(1000)  # monetary balance (in currency units) at the start of the experiment for UCs
@@ -74,7 +74,7 @@ class Days(Page):
             RHS3 = actions['actionRESell']
             LHS2 = Constants.CHCmax - RHS1
             if LHS1 > RHS1:
-                return 'You cannot store more than you can carry.'
+                return 'You cannot buy more than you can store.'
             if RHS2 > 0 or RHS3 > 0:
                 if LHS2 < RHS2 + RHS3:
                     return 'You cannot forward or sell more than you have in store.'
@@ -117,8 +117,9 @@ def creating_session(subsession):
                 player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
             else:
                 player.participant.capac = Constants.CHCmax
-            player.participant.traded = 0  # initialization for a flag on whether the PP or the SCH action has been spent during the payoff process
-            print(player.participant.capac)
+            # player.participant.traded = 0  # initialization for a flag on whether the PP or the SCH action has been spent during the payoff process
+            player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
+            player.participant.balance = Constants.InitBalance  # initialize balance
 
 
 def set_payoffs(subsession):

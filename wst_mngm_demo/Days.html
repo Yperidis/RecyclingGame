@@ -13,11 +13,7 @@
     and a total item storage capacity of {{ Constants.UCCmax }} per {{'UC'}} or {{ Constants.CHCmax }} 
     per {{'CH'}}.
     {{ if player.role_own == 'UC' or player.role_own == 'CH' }}
-        {{ if player.role_own == 'UC' }}
-            Your current capacity is {{ player.participant.capac }}.
-        {{ else }}
-            Your current capacity is {{ player.participant.capac }}.
-        {{ endif }}
+        You currently have {{ player.participant.store }} items in store.
     {{ endif }}
 </p>
 
@@ -27,6 +23,8 @@
 {{ elif player.role_own == 'CH'}}
 <img src="{{ static 'wst_mngm_demo/CH.png' }}"/>
 
+{{ else player.role_own == 'CH'}}
+<img src="{{ static 'wst_mngm_demo/RE.png' }}"/>
 
 {{ endif }}
 

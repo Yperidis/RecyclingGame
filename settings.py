@@ -33,7 +33,7 @@ from os import environ
 SESSION_CONFIGS = [
     dict(
         name='wst_mngm_demo',
-        num_demo_participants=5,
+        num_demo_participants=3,
         app_sequence=['wst_mngm_demo']
     ),
 ]
@@ -48,7 +48,7 @@ SESSION_CONFIG_DEFAULTS = dict(
     real_world_currency_per_point=1.00, participation_fee=0.00, doc=""
 )
 
-PARTICIPANT_FIELDS = ['capac', 'wait_page_arrival', 'traded']
+PARTICIPANT_FIELDS = ['capac', 'store', 'wait_page_arrival', 'balance']
 SESSION_FIELDS = []
 
 # ISO-639 code
