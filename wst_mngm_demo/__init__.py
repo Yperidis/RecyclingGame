@@ -51,6 +51,15 @@ class Days(Page):
     form_model = 'player'
     # form_fields = ['actionSUC', 'actionPP', 'actionD', 'WstType']  # the action set
 
+    @staticmethod
+    def vars_for_template(player: Player):
+        if player.role_own == "RE":
+            return dict()
+        else:
+            return dict(
+                items_to_handle=player.participant.store + Constants.g
+            )
+
 
     @staticmethod
     def get_form_fields(player):
@@ -112,7 +121,7 @@ def creating_session(subsession):
             player.role_own = roles[0]
         else:
             player.role_own = roles[1]
-        if player.role_own == 'UC' or player.role_own == 'CH':
+        if player.round_number == 1 and (player.role_own == 'UC' or player.role_own == 'CH'):
             if player.role_own == 'UC':
                 player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
             else:

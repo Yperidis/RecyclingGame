@@ -12,8 +12,11 @@
     a rate of waste item generation of {{ Constants.g }} per round-day per {{'UC'}} role,
     and a total item storage capacity of {{ Constants.UCCmax }} per {{'UC'}} or {{ Constants.CHCmax }} 
     per {{'CH'}}.
-    {{ if player.role_own == 'UC' or player.role_own == 'CH' }}
+    {{ if player.role_own == 'CH' }}
         You currently have {{ player.participant.store }} items in store.
+    {{ endif }}
+    {{ if player.role_own == 'UC' }}
+        You currently have {{ player.participant.store }} items in store and thus need to handle {{ items_to_handle }} items.
     {{ endif }}
 </p>
 
