@@ -92,12 +92,15 @@ class Days(Page):
 
 
     @staticmethod
-    def before_next_page(player: Player, timeout_happened):  # function for recording the players' arrival times at the wait pages
+    def before_next_page(player: Player, timeout_happened):  # function for backdrop processes while waiting
         participant = player.participant
+
+        participant.UCOpenSupply = player.actionPP  # flags for keeping track of what was actually sold and bought to be displayed at the results
+        participant.CHOpenDemand = player.actionBCH
 
         import time
 
-        participant.wait_page_arrival = time.time()
+        participant.wait_page_arrival = time.time()  # recording the players' arrival times at the wait pages
 
 
 class ResultsWaitPage(WaitPage):
