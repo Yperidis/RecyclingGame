@@ -43,7 +43,7 @@ class Player(BasePlayer):
     actionD = models.IntegerField(min=0, max=Constants.g+Constants.UCCmax, label="How many items are you willing to dispose through standard means?")
     actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, label="How many iterms are you willing to sell to an RE?")
-    WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
+    # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
 
 # PAGES
@@ -64,9 +64,11 @@ class Days(Page):
     @staticmethod
     def get_form_fields(player):
         if player.role_own == 'UC':
-            return ['actionSUC', 'actionPP', 'priceUC', 'actionD', 'WstType']
+            # return ['actionSUC', 'actionPP', 'priceUC', 'actionD', 'WstType']
+            return ['actionSUC', 'actionPP', 'priceUC', 'actionD']            
         elif player.role_own == 'CH':
-            return ['actionBCH', 'actionFwd', 'actionRESell', 'priceCH', 'WstType']
+            # return ['actionBCH', 'actionFwd', 'actionRESell', 'priceCH', 'WstType']
+            return ['actionBCH', 'actionFwd', 'actionRESell', 'priceCH']
 
 
     @staticmethod

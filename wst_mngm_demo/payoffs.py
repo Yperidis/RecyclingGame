@@ -10,7 +10,7 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
         for CHplayer in CHWTsort:  # "first come" CH order
             # next_CHplayer = CHplayer[0].in_round(CHplayer[0].round_number + 1)
             if UCplayer[0].priceUC <= CHplayer[0].priceCH:  # condition for the trade to take place
-                if CHTraded == 0:  # if the demand of the CH in question is non-zero
+                if CHTraded == 0:  # the demand of the CH in question is non-zero
                     if UCplayer[0].actionPP <= CHplayer[0].actionBCH:  # check the relationship between the UC offer and the CH demand
                         if UCplayer[0].actionPP > 0:  # check whether we are talking about a non-zero PP value to signal appropriately
                             UCTraded = UCplayer[0].actionPP  # signal that the offer of the UC has been satisfied by the amount the CH is willing to store (local demand)
@@ -23,7 +23,7 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                         CHplayer[0].participant.capac = CHplayer[0].participant.capac - UCplayer[0].actionPP  # CH recursive capacity relation
                     else:  # partial fulfillment of UC offer from available demand (CH)
                         if CHplayer[0].actionBCH > 0:
-                            CHTraded = CHplayer[0].actionBCH  # signal that the offer of the CH has been satisfied by the amount the UC is willing to sell (local supply)
+                            CHTraded = CHplayer[0].actionBCH  # signal that the demand of the CH has been satisfied by the amount the UC is willing to sell (local supply)
                         else:
                             CHTraded = 1
                         UCplayer[0].payoff = CHplayer[0].actionBCH * ConstantsClP  # pay per the CH stor quantity
@@ -34,10 +34,12 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                     CHplayer[0].participant.store = ConstantsCHCmax - CHplayer[0].participant.capac # calculate current CH storage
                     if UCTraded > 0:  # if the offer of the UC in question has been spent proceed to the next UC (case of PP=0 accounted for)
                         break
-                else:  # if the demand of the CH in question is zero proceed to the next CH
+                else:  # if the CH in question has met their demand proceed to the next CH
+                    CHTraded = 0  # reset the flag before proceeding to the next CH
                     continue
             else:  # no trade takes place for the given pair. Proceed to the next CH.
                 continue
         if UCplayer[0].actionD > 0 or UCplayer[0].actionPP - UCTraded > 0:  # calculate the costs of a potential standard disposal by choice or by lack of satisfaction on the platform
         # if UCplayer[0].actionD > 0 or UCplayer[0].actionPP - UCplayer[0].participant.traded > 0:  # calculate the costs of a potential standard disposal by choice or by lack of satisfaction on the platform
             UCplayer[0].payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the UC payoff
+        UCTraded = 0  # reset the flag before proceeding to the next UC

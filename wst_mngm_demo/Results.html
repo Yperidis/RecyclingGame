@@ -8,15 +8,16 @@
 {{ if player.role_own == 'UC' }}
     <p>
         Your current balance is {{ player.participant.balance }} and in the current round ({{player.round_number}}) you
-        stored {{player.actionSUC}}, tried to push to platform {{player.actionPP}} and disposed willingly in the standard manner 
-        {{player.actionD}} items. Your payoff for this round was {{ player.payoff }} and your current capacity is 
-        {{player.participant.capac}}.
+        stored {{player.actionSUC}}, tried to push to platform {{player.actionPP}} for {{ player.priceUC }} and disposed 
+        willingly in the standard manner {{player.actionD}} items. The clearing price was {{ Constants.ClP }}, your payoff for this round was 
+        {{ player.payoff }} and your current capacity is {{player.participant.capac}}.
     </p>
 {{ elif player.role_own == 'CH' }}
     <p>
-        Your current balance is {{ player.participant.balance }} and in the current round ({{player.round_number}}) yous
-        tried to buy {{player.actionBCH}}, forward to another CH {{player.actionFwd}} and sell to an RE {{player.actionRESell}} items. 
-        Your payoff for this round was {{ player.payoff }} and your current capacity is {{player.participant.capac}}.
+        Your current balance is {{ player.participant.balance }} and in the current round ({{player.round_number}}) you
+        tried to buy {{player.actionBCH}} for {{ player.priceCH }}, forward to another CH {{player.actionFwd}} and sell to an RE {{player.actionRESell}} items. 
+        The clearing price was {{ Constants.ClP }}, your payoff for this round was {{ player.payoff }} and your current capacity is 
+        {{player.participant.capac}}.
     </p>
 
 {{ else }}
