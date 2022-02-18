@@ -10,6 +10,7 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                 if CHplayer[0].participant.CHOpenDemand > 0:  # the demand of the CH in question is non-zero
                     if UCplayer[0].actionPP <= CHplayer[0].actionBCH:  # check the relationship between the UC offer and the CH demand
                         UCplayer[0].participant.UCOpenSupply = UCplayer[0].participant.UCOpenSupply - UCplayer[0].actionPP  # track the remaining supply of the UC in question
+                        CHplayer[0].participant.CHOpenDemand = CHplayer[0].participant.CHOpenDemand - UCplayer[0].actionPP  # same for CH
                         UCplayer[0].payoff = UCplayer[0].actionPP * ConstantsClP  # pay per the UC PP quantity
                         UCplayer[0].participant.balance = UCplayer[0].participant.balance + UCplayer[0].payoff  # track the UC balance
                         CHplayer[0].payoff = -UCplayer[0].actionPP * ConstantsClP
@@ -17,6 +18,7 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                         CHplayer[0].participant.capac = CHplayer[0].participant.capac - UCplayer[0].actionPP  # CH recursive capacity relation
                     else:  # partial fulfillment of UC offer from available demand (CH)
                         CHplayer[0].participant.CHOpenDemand = CHplayer[0].participant.CHOpenDemand - CHplayer[0].actionBCH  # track the remaining demand of the CH in question
+                        UCplayer[0].participant.UCOpenSupply = UCplayer[0].participant.UCOpenSupply - CHplayer[0].actionBCH  # same for the UC
                         UCplayer[0].payoff = CHplayer[0].actionBCH * ConstantsClP  # pay per the CH stor quantity
                         UCplayer[0].participant.balance = UCplayer[0].participant.balance + UCplayer[0].payoff  # track the UC balance
                         CHplayer[0].payoff = -CHplayer[0].actionBCH * ConstantsClP

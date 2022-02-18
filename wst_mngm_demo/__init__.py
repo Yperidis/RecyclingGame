@@ -95,8 +95,10 @@ class Days(Page):
     def before_next_page(player: Player, timeout_happened):  # function for backdrop processes while waiting
         participant = player.participant
 
-        participant.UCOpenSupply = player.actionPP  # flags for keeping track of what was actually sold and bought to be displayed at the results
-        participant.CHOpenDemand = player.actionBCH
+        if player.role_own == 'UC':
+            participant.UCOpenSupply = player.actionPP  # flags for keeping track of what was actually sold and bought to be displayed at the results
+        elif player.role_own == 'CH':            
+            participant.CHOpenDemand = player.actionBCH
 
         import time
 
