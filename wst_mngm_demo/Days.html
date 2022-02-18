@@ -13,10 +13,11 @@
     and a total item storage capacity of {{ Constants.UCCmax }} per {{'UC'}} or {{ Constants.CHCmax }} 
     per {{'CH'}}.
     {{ if player.role_own == 'CH' }}
-        You currently have {{ player.participant.store }} items in store.
+        You currently have {{ player.participant.store }} item(s) in store and your balance is {{ player.participant.balance }}.
     {{ endif }}
     {{ if player.role_own == 'UC' }}
-        You currently have {{ player.participant.store }} items in store and thus need to handle {{ items_to_handle }} items.
+        You currently have {{ player.participant.store }} item(s) in store and thus need to handle {{ items_to_handle }} items. 
+        Your current balance is {{ player.participant.balance }}
     {{ endif }}
 </p>
 
