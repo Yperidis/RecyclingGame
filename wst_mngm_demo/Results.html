@@ -4,29 +4,86 @@
 
 {{ block content }}
 
+<h2>
+    End of day {{ player.round_number }} as {{ player.role_own }} role.
+</h2>
 
-{{ if player.role_own == 'UC' }}
-    <p>
-        Your current balance is {{ player.participant.balance }} and in the current round ({{player.round_number}}) you
-        stored {{player.actionSUC}}, tried to push to platform {{player.actionPP}} for {{ player.priceUC }} and disposed 
-        willingly in the standard manner {{player.actionD}} items. The clearing price was {{ Constants.ClP }}, your payoff for this round was 
-        {{ player.payoff }} and your current capacity is {{player.participant.capac}}.
-    </p>
-{{ elif player.role_own == 'CH' }}
-    <p>
-        Your current balance is {{ player.participant.balance }} and in the current round ({{player.round_number}}) you
-        tried to buy {{player.actionBCH}} for {{ player.priceCH }}, forward to another CH {{player.actionFwd}} and sell to an RE {{player.actionRESell}} items. 
-        The clearing price was {{ Constants.ClP }}, your payoff for this round was {{ player.payoff }} and your current capacity is 
-        {{player.participant.capac}}.
-    </p>
-
-{{ else }}
-    <p>
-        You might have bought some items.
-    </p>
-
+{{ if player.role_own == 'UC'}}
+    {{ if player.participant.sold > 0 }}
+        The clearing price is {{ Constants.ClP }}
+    {{ endif }}
 {{ endif }}
 
+{{ if player.role_own == 'CH'}}
+    {{ if player.participant.bought > 0 }}
+        The clearing price is {{ Constants.ClP }}.
+    {{ endif }}
+{{ endif }}
+
+{{ if player.role_own == 'UC' or player.role_own == 'CH' }}
+    The default operator's tariff is {{ Constants.OpTariff }}. 
+
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col">Balance</th>
+        <th scope="col">Stored</th>
+        {{ if player.role_own == 'UC' }}
+            <th colspan="2" class="table-active">Push</th>
+            <th colspan="2" class="table-active">Operator disposal</th>
+        {{ endif }}
+        {{ if player.role_own == 'CH' }}
+            <th colspan="2" class="table-active">Buy</th>
+            <th colspan="2" class="table-active">Push</th>            
+        {{ endif }}        
+      </tr>
+    </thead>
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        <th scope="col"></th>
+        {{ if player.role_own == 'UC' }}
+            <th scope="col">Bade</th>
+            <th scope="col">Pushed</th>
+            <th scope="col">Willingly</th>
+            <th scope="col">Bidding residuals</th>            
+        {{ endif }}
+        {{ if player.role_own == 'CH' }}
+            <th scope="col">Bade</th>
+            <th scope="col">Bought</th>
+            <th scope="col">To CH (some ID)</th>
+            <th scope="col">To RE (some ID)</th>            
+        {{ endif }}        
+      </tr>
+    </thead>
+    <tbody>
+        <td></td>
+        <td>{{ player.participant.balance }}</td>
+        <td>{{player.participant.store}}</td>
+        {{ if player.role_own == 'UC' }}
+            <td>{{ player.actionPP }}</td>
+            <td>{{ player.participant.sold }}</td>
+            <td>{{ player.actionD }}</td>
+            <td>{{ player.participant.UCOpenSupply }}</td>
+        {{ endif }}
+        {{ if player.role_own == 'CH' }}
+            <td>{{ player.actionBCH }}</td>
+            <td>{{ player.participant.bought }}</td>
+            <td>TBD</td>
+            <td>TBD</td>
+        {{ endif }}        
+      </tr>
+    </tbody>
+  </table>
+
+{{ else }}
+  <p>
+      You might have bought some items.
+  </p>
+
+{{ endif }}
 
 
 {{ next_button }}

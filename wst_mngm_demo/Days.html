@@ -4,22 +4,37 @@
 {{ block content }} 
 
 <h2>
-    Day {{ player.round_number }} with a {{ player.role_own }} role.
+    Day {{ player.round_number }} as {{ player.role_own }} role.
 </h2>
 
-<p>
-    This is an economic goods game with {{ Constants.players_per_group }} players per group,
-    a rate of waste item generation of {{ Constants.g }} per round-day per {{'UC'}} role,
-    and a total item storage capacity of {{ Constants.UCCmax }} per {{'UC'}} or {{ Constants.CHCmax }} 
-    per {{'CH'}}.
-    {{ if player.role_own == 'CH' }}
-        You currently have {{ player.participant.store }} item(s) in store and your balance is {{ player.participant.balance }}.
-    {{ endif }}
-    {{ if player.role_own == 'UC' }}
-        You currently have {{ player.participant.store }} item(s) in store and thus need to handle {{ items_to_handle }} items. 
-        Your current balance is {{ player.participant.balance }}
-    {{ endif }}
-</p>
+{{ if player.role_own == 'UC' or player.role_own == 'CH'}}
+
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col">Balance</th>
+        <th scope="col">Capacity (C<sub>max</sub> = {{ Constants.UCCmax }})</th>
+        {{ if player.role_own == 'UC' }}
+        <th scope="col">Generated waste items</th>
+        {{ endif }}
+        <th scope="col">Items in store</th>
+        <th scope="col">Items to handle</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row"></th>
+        <td>{{ player.participant.balance }}</td>
+        <td>{{player.participant.capac}}</td>
+        <td>{{ Constants.g }}</td>
+        <td>{{ player.participant.store }}</td>
+        <td>{{ items_to_handle }}</td>        
+      </tr>
+    </tbody>
+  </table>
+
+{{ endif }}
 
 {{ if player.role_own == 'UC' }}
 <img src="{{ static 'wst_mngm_demo/UC.png' }}"/>

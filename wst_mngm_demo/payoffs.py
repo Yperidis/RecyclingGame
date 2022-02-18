@@ -11,6 +11,7 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                     if UCplayer[0].actionPP <= CHplayer[0].actionBCH:  # check the relationship between the UC offer and the CH demand
                         UCplayer[0].participant.UCOpenSupply -= UCplayer[0].actionPP  # track the remaining supply of the UC in question
                         CHplayer[0].participant.CHOpenDemand -= UCplayer[0].actionPP  # same for CH
+                        CHplayer[0].participant.bought = CHplayer[0].actionBCH - CHplayer[0].participant.CHOpenDemand  # items bought
                         UCplayer[0].payoff = UCplayer[0].actionPP * ConstantsClP  # pay per the UC PP quantity
                         UCplayer[0].participant.balance = UCplayer[0].participant.balance + UCplayer[0].payoff  # track the UC balance
                         CHplayer[0].payoff = -UCplayer[0].actionPP * ConstantsClP
@@ -18,6 +19,7 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                         CHplayer[0].participant.capac -= UCplayer[0].actionPP  # CH recursive capacity relation
                     else:  # partial fulfillment of UC offer from available demand (CH)
                         CHplayer[0].participant.CHOpenDemand -= CHplayer[0].actionBCH  # track the remaining demand of the CH in question
+                        CHplayer[0].participant.bought = CHplayer[0].actionBCH  # items bought
                         UCplayer[0].participant.UCOpenSupply -= CHplayer[0].actionBCH  # same for the UC
                         UCplayer[0].payoff = CHplayer[0].actionBCH * ConstantsClP  # pay per the CH stor quantity
                         UCplayer[0].participant.balance += UCplayer[0].payoff  # track the UC balance
@@ -31,7 +33,7 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                     continue
             else:  # no trade takes place for the given pair. Proceed to the next CH.
                 continue
-        if UCplayer[0].actionD > 0 or UCplayer[0].actionPP - UCplayer[0].participant.UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
-        # if UCplayer[0].actionD > 0 or UCplayer[0].actionPP - UCplayer[0].participant.traded > 0:  # calculate the costs of a potential standard disposal by choice or by lack of satisfaction on the platform
+        UCplayer[0].participant.sold = UCplayer[0].actionPP - UCplayer[0].participant.UCOpenSupply  # items sold
+        if UCplayer[0].actionD > 0 or UCplayer[0].participant.sold > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             UCplayer[0].payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the UC payoff
-            UCplayer[0].participant.balance -= ConstantsOpTariff  # track the UC balance
+            UCplayer[0].participant.balance -= ConstantsOpTariff  # update the UC balance

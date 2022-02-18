@@ -136,6 +136,8 @@ def creating_session(subsession):
             # player.participant.traded = 0  # initialization for a flag on whether the PP or the SCH action has been spent during the payoff process
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
             player.participant.balance = Constants.InitBalance  # initialize balance
+            player.participant.sold = 0  # initialize sold waste
+            player.participant.bought = 0  # initialize bought waste
 
 
 def set_payoffs(subsession):
