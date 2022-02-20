@@ -45,6 +45,13 @@ class Player(BasePlayer):
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, label="How many iterms are you willing to sell to an RE?")
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
+    # Fields not set by participant for payoff calculation
+    wait_page_arrival = models.FloatField()
+    UCOpenSupply = models.IntegerField()
+    CHOpenDemand = models.IntegerField()
+    sold = models.IntegerField()
+    bought = models.IntegerField()
+
 
 # PAGES
 class Days(Page):
@@ -54,11 +61,14 @@ class Days(Page):
     @staticmethod
     def vars_for_template(player: Player):
         if player.role_own == "RE":
-            return dict()
+            items_to_handle = 0
+        elif player.role_own == "UC":
+            items_to_handle = player.participant.store + Constants.g
         else:
-            return dict(
-                items_to_handle=player.participant.store + Constants.g
-            )
+            items_to_handle = player.participant.store
+        return dict(
+            items_to_handle=items_to_handle
+        )
 
 
     @staticmethod
@@ -93,16 +103,14 @@ class Days(Page):
 
     @staticmethod
     def before_next_page(player: Player, timeout_happened):  # function for backdrop processes while waiting
-        participant = player.participant
-
         if player.role_own == 'UC':
-            participant.UCOpenSupply = player.actionPP  # flags for keeping track of what was actually sold and bought to be displayed at the results
+            player.UCOpenSupply = player.actionPP  # flags for keeping track of what was actually sold and bought to be displayed at the results
         elif player.role_own == 'CH':            
-            participant.CHOpenDemand = player.actionBCH
+            player.CHOpenDemand = player.actionBCH
 
         import time
 
-        participant.wait_page_arrival = time.time()  # recording the players' arrival times at the wait pages
+        player.wait_page_arrival = time.time()  # recording the players' arrival times at the wait pages
 
 
 class ResultsWaitPage(WaitPage):
@@ -114,7 +122,7 @@ class Results(Page):
 
 
 def creating_session(subsession):
-    new_structure = [list(range(1,Constants.players_per_group+1))]  # prerequisite to set the number of players in a tabular structure for grouping purposes
+    new_structure = [list(range(1, Constants.players_per_group+1))]  # prerequisite to set the number of players in a tabular structure for grouping purposes
     subsession.set_group_matrix(new_structure)
     players = subsession.get_players()
     subsession.group_randomly(fixed_id_in_group=True)  # for grouping players randomly upon initialisation but keeping roles constant throughout the rounds    
@@ -136,8 +144,6 @@ def creating_session(subsession):
             # player.participant.traded = 0  # initialization for a flag on whether the PP or the SCH action has been spent during the payoff process
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
             player.participant.balance = Constants.InitBalance  # initialize balance
-            player.participant.sold = 0  # initialize sold waste
-            player.participant.bought = 0  # initialize bought waste
 
 
 def set_payoffs(subsession):
