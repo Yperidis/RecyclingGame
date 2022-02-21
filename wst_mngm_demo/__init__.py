@@ -41,8 +41,8 @@ class Player(BasePlayer):
     priceUC = models.CurrencyField(min=Constants.pUCmin, init=Constants.pUCmin, label="Name the price you want to sell for.")
     priceCH = models.CurrencyField(min=0, max=Constants.pCHmax, init=Constants.pCHmax, label="Name the price you are willing to buy for.")
     actionD = models.IntegerField(min=0, max=Constants.g+Constants.UCCmax, label="How many items are you willing to dispose through standard means?")
-    actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
-    actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, label="How many iterms are you willing to sell to an RE?")
+    # actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
+    actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to sell to an RE?")
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
     # Fields not set by participant for payoff calculation
@@ -78,7 +78,7 @@ class Days(Page):
             return ['actionSUC', 'actionPP', 'priceUC', 'actionD']            
         elif player.role_own == 'CH':
             # return ['actionBCH', 'actionFwd', 'actionRESell', 'priceCH', 'WstType']
-            return ['actionBCH', 'actionFwd', 'actionRESell', 'priceCH']
+            return ['actionBCH', 'actionRESell', 'priceCH']
 
 
     @staticmethod
@@ -90,15 +90,12 @@ class Days(Page):
                 return 'The sum of the stored items, pushed to platform and otherwise disposed must equal the generated waste items minus the current capacity for all rounds.'
         elif player.role_own == 'CH':
             LHS1 = actions['actionBCH']
-            RHS1 = player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
-            RHS2 = actions['actionFwd']  
-            RHS3 = actions['actionRESell']
-            LHS2 = Constants.CHCmax - RHS1
-            if LHS1 > RHS1:
+            LHS2 = actions['actionRESell']
+            RHS1 = player.participant.store  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
+            if LHS1 - LHS2 > RHS1:
                 return 'You cannot buy more than you can store.'
-            if RHS2 > 0 or RHS3 > 0:
-                if LHS2 < RHS2 + RHS3:
-                    return 'You cannot forward or sell more than you have in store.'
+            if LHS2 > 0 and RHS1 < LHS2:
+                return 'You cannot sell more than you have in store.'
 
 
     @staticmethod
