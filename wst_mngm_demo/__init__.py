@@ -91,10 +91,11 @@ class Days(Page):
         elif player.role_own == 'CH':
             LHS1 = actions['actionBCH']
             LHS2 = actions['actionRESell']
-            RHS1 = player.participant.store  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
+            RHS1 = player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
+            RHS2 = player.participant.store
             if LHS1 - LHS2 > RHS1:
                 return 'You cannot buy more than you can store.'
-            if LHS2 > 0 and RHS1 < LHS2:
+            if LHS2 > 0 and RHS2 < LHS2: 
                 return 'You cannot sell more than you have in store.'
 
 
