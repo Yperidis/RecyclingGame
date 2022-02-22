@@ -10,13 +10,13 @@
 
 {{ if player.role_own == 'UC'}}
     {{ if player.sold > 0 }}
-        The clearing price is {{ Constants.ClP }}. <br>
+        The clearing price is {{ player.ClPr }}. <br>
     {{ endif }}
 {{ endif }}
 
 {{ if player.role_own == 'CH'}}
     {{ if player.bought > 0 }}
-        The clearing price is {{ Constants.ClP }}. <br>
+        The clearing price is {{ player.ClPr }}. <br>
     {{ endif }}
 {{ endif }}
 

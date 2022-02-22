@@ -18,9 +18,9 @@ class Constants(BaseConstants):
     CHCmax = 50  # maximum item storage capacity for CH. In this rough form not taking size or weight into account UCCmax>=g.    
     OpTariff = cu(20)  # fee for operator waste handling
     ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
-    pUCmin = min(ItemDep.values())  # minimum price at which UC is willing to sell
-    pCHmax = max(ItemDep.values())  # maximum price at which CH is willing to buy
-    ClP = (pUCmin + pCHmax)/2  # a tentative clearing price    
+    pUCmin = 0 # min(ItemDep.values())  # minimum price at which UC is willing to sell
+    # pCHmax = max(ItemDep.values())  # maximum price at which CH is willing to buy
+    # ClP = (pUCmin + pCHmax)/2  # a tentative static clearing price    
 
 
 class Subsession(BaseSubsession):
@@ -37,9 +37,9 @@ class Player(BasePlayer):
     # Action set: actionSUC for "store", actionPP for "push on platform" and actionD for "Dispose through standard means"
     actionSUC = models.IntegerField(min=0, max=Constants.UCCmax, initial=0, label="How many items are you willing to store?")
     actionBCH = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to buy?")
-    actionPP = models.IntegerField(min=0, max=Constants.g+Constants.UCCmax, label="How many items are you willing to push to the platform?")
+    actionPP = models.IntegerField(min=0, label="How many items are you willing to push to the platform?")
     priceUC = models.CurrencyField(min=Constants.pUCmin, init=Constants.pUCmin, label="Name the price you want to sell for.")
-    priceCH = models.CurrencyField(min=0, max=Constants.pCHmax, init=Constants.pCHmax, label="Name the price you are willing to buy for.")
+    priceCH = models.CurrencyField(min=0, label="Name the price you are willing to buy for.")
     actionD = models.IntegerField(min=0, max=Constants.g+Constants.UCCmax, label="How many items are you willing to dispose through standard means?")
     # actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to sell to an RE?")
@@ -49,8 +49,9 @@ class Player(BasePlayer):
     wait_page_arrival = models.FloatField()
     UCOpenSupply = models.IntegerField()
     CHOpenDemand = models.IntegerField()
-    sold = models.IntegerField()
-    bought = models.IntegerField()
+    sold = models.IntegerField(initial=0)
+    bought = models.IntegerField(initial=0)
+    ClPr = models.CurrencyField()  #  a field to keep track of the clearing price for each player
 
 
 # PAGES
@@ -87,7 +88,7 @@ class Days(Page):
         if player.role_own == 'UC':
             LHS, RHS = actions['actionSUC'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.UCCmax - player.participant.capac
             if LHS != RHS:
-                return 'The sum of the stored items, pushed to platform and otherwise disposed must equal the generated waste items minus the current capacity for all rounds.'
+                return 'The sum of the items in store, pushed to platform and otherwise disposed must equal the generated waste items plus the current storage for all rounds.'
         elif player.role_own == 'CH':
             LHS1 = actions['actionBCH']
             LHS2 = actions['actionRESell']
@@ -97,6 +98,8 @@ class Days(Page):
                 return 'You cannot buy more than you can store.'
             if LHS2 > 0 and RHS2 < LHS2: 
                 return 'You cannot sell more than you have in store.'
+            if player.participant.balance - LHS1 * actions['priceCH'] <= 0:
+                return 'You cannot afford to buy this quantity.'  # TODO consider debt incurrence here
 
 
     @staticmethod
@@ -146,7 +149,7 @@ def creating_session(subsession):
 
 def set_payoffs(subsession):
     players = subsession.get_players()
-    UCPayoffnRest(players, 'UC', 'CH', Constants.UCCmax, Constants.CHCmax, Constants.ClP, Constants.OpTariff)
+    UCPayoffnRest(players, 'UC', 'CH', Constants.UCCmax, Constants.CHCmax, Constants.OpTariff)
 
 
 page_sequence = [Days, ResultsWaitPage, Results]
