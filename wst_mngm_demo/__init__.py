@@ -47,7 +47,7 @@ class Player(BasePlayer):
 
     # Fields not set by participant for payoff calculation
     wait_page_arrival = models.FloatField()
-    UCOpenSupply = models.IntegerField()
+    UCOpenSupply = models.IntegerField(initial=0)
     CHOpenDemand = models.IntegerField()
     sold = models.IntegerField(initial=0)
     bought = models.IntegerField(initial=0)
@@ -79,7 +79,7 @@ class Days(Page):
             return ['actionSUC', 'actionPP', 'priceUC', 'actionD']            
         elif player.role_own == 'CH':
             # return ['actionBCH', 'actionFwd', 'actionRESell', 'priceCH', 'WstType']
-            return ['actionBCH', 'actionRESell', 'priceCH']
+            return ['actionBCH', 'actionRESell', 'priceCH', 'actionD']
 
 
     @staticmethod
@@ -96,8 +96,8 @@ class Days(Page):
             RHS2 = player.participant.store
             if LHS1 - LHS2 > RHS1:
                 return 'You cannot buy more than you can store.'
-            if LHS2 > 0 and RHS2 < LHS2: 
-                return 'You cannot sell more than you have in store.'
+            if LHS2 + actions['actionD'] > 0 and RHS2 < LHS2 + actions['actionD']: 
+                return 'You cannot sell or dispose more than you have in store.'
             if player.participant.balance - LHS1 * actions['priceCH'] <= 0:
                 return 'You cannot afford to buy this quantity.'  # TODO consider debt incurrence here
 

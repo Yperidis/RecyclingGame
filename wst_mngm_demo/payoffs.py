@@ -6,6 +6,11 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
         UCplayer[0].participant.capac = ConstantsUCCmax - UCplayer[0].actionSUC  # UC recursive capacity relation
         UCplayer[0].participant.store = UCplayer[0].actionSUC  # calculate current UC storage
         for CHplayer in CHWTsort:  # "first come" CH order
+            if CHplayer[0].actionD > 0:  # calculate the costs of a potential standard disposal by choice for the CH
+                CHplayer[0].payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the CH payoff
+                CHplayer[0].participant.balance -= ConstantsOpTariff  # update the CH balance
+                CHplayer[0].participant.capac += CHplayer[0].actionD  # update the CH capacity and storage
+                CHplayer[0].participant.store -= CHplayer[0].actionD
             if UCplayer[0].priceUC <= CHplayer[0].priceCH:  # condition for the trade to take place
                 if CHplayer[0].CHOpenDemand > 0:  # the demand of the CH in question is non-zero
                     UCplayer[0].ClPr = min(UCplayer[0].priceUC, CHplayer[0].priceCH)  # the clearing price
@@ -16,7 +21,7 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                         CHplayer[0].bought = CHplayer[0].actionBCH - CHplayer[0].CHOpenDemand  # items bought
                         UCplayer[0].payoff = UCplayer[0].actionPP * UCplayer[0].ClPr # ConstantsClP  # pay per the UC PP quantity
                         UCplayer[0].participant.balance = UCplayer[0].participant.balance + UCplayer[0].payoff  # track the UC balance
-                        CHplayer[0].payoff = -UCplayer[0].actionPP * UCplayer[0].ClPr # ConstantsClP
+                        CHplayer[0].payoff -= UCplayer[0].actionPP * UCplayer[0].ClPr # ConstantsClP
                         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
                         CHplayer[0].participant.capac -= UCplayer[0].actionPP  # CH recursive capacity relation
                     else:  # partial fulfillment of UC offer from available demand (CH)
@@ -25,7 +30,7 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                         UCplayer[0].UCOpenSupply -= CHplayer[0].actionBCH  # same for the UC
                         UCplayer[0].payoff = CHplayer[0].actionBCH * UCplayer[0].ClPr #ConstantsClP  # pay per the CH stor quantity
                         UCplayer[0].participant.balance += UCplayer[0].payoff  # track the UC balance
-                        CHplayer[0].payoff = -CHplayer[0].actionBCH * UCplayer[0].ClPr #ConstantsClP
+                        CHplayer[0].payoff -= CHplayer[0].actionBCH * UCplayer[0].ClPr #ConstantsClP
                         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
                         CHplayer[0].participant.capac -= CHplayer[0].actionBCH  # CH recursive capacity relation
                     CHplayer[0].participant.store = ConstantsCHCmax - CHplayer[0].participant.capac # calculate current CH storage

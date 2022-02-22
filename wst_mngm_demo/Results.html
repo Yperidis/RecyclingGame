@@ -8,20 +8,23 @@
     End of day {{ player.round_number }} as {{ player.role_own }} role.
 </h2>
 
-{{ if player.role_own == 'UC'}}
-    {{ if player.sold > 0 }}
-        The clearing price is {{ player.ClPr }}. <br>
-    {{ endif }}
+{{ if player.role_own == 'UC' and player.sold > 0 }}
+    The clearing price is {{ player.ClPr }}. <br>
 {{ endif }}
 
-{{ if player.role_own == 'CH'}}
-    {{ if player.bought > 0 }}
-        The clearing price is {{ player.ClPr }}. <br>
-    {{ endif }}
+{{ if player.role_own == 'CH' and player.bought > 0 }}
+    The clearing price is {{ player.ClPr }}. <br>
+{{ endif }}
+
+{{ if player.role_own == 'UC' and player.actionD > 0 or player.UCOpenSupply > 0 }}
+    The default operator's tariff is {{ Constants.OpTariff }}. <br> <br>
+{{ endif }}
+
+{{ if player.role_own == 'CH' and player.actionD > 0 }}
+    The default operator's tariff is {{ Constants.OpTariff }}. <br> <br>
 {{ endif }}
 
 {{ if player.role_own == 'UC' or player.role_own == 'CH' }}
-    The default operator's tariff is {{ Constants.OpTariff }}. <br> <br>
 
 <table class="table results-table">
     <thead>
@@ -33,8 +36,9 @@
                 <th colspan="2">Disposed through standard means</th>
             {{ endif }}
             {{ if player.role_own == 'CH' }}
-                <th colspan="2">Bought from UC</th>
-                <th colspan="2">Sold</th>
+                <th colspan="2">Bought from UC (IDs) </th>
+                <th scope="col">Sold to RE (IDs)</th>
+                <th scope="col">Disposed through standard means</th>
             {{ endif }}
         </tr>
     </thead>
@@ -44,15 +48,15 @@
             <td></td>
             {{ if player.role_own == 'UC' }}
                 <td>Offered</td>
-                <td>Sold to CH</td>
+                <td>Sold to CH (IDs)</td>
                 <td>Willingly</td>
                 <td>Not sold to CH</td>
             {{ endif }}
             {{ if player.role_own == 'CH' }}
                 <td>Demanded</td>
                 <td>Bought</td>
-                <td>To CH (some ID)</td>
-                <td>To RE (some ID)</td>
+                <td></td>
+                <td></td>
             {{ endif }}
         </tr>
         <tr>
@@ -68,7 +72,7 @@
                 <td>{{ player.actionBCH }}</td>
                 <td>{{ player.bought }}</td>
                 <td>TBD</td>
-                <td>TBD</td>
+                <td>{{ player.actionD }}</td>
             {{ endif }}
         </tr>
     </tbody>
