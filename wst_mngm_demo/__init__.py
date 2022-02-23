@@ -1,6 +1,6 @@
 from otree.api import *
 from .payoffs import *
-# from .utils import *
+from .utils import *
 
 
 doc = """
@@ -12,15 +12,17 @@ class Constants(BaseConstants):
     players_per_group = 3
     # UC_role, CH_role, RE_role = 'UC', 'CH', 'RE'
     num_rounds = 3
-    InitBalance = cu(1000)  # monetary balance (in currency units) at the start of the experiment for UCs
+    InitBalance = cu(4000)  # monetary balance (in currency units) at the start of the experiment for UCs. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c), assuming they can afford it.
     g = 5  # rate of waste (item generation per day-round)
     UCCmax = 6  # maximum item storage capacity for UC. In this rough form not taking size or weight into account UCCmax>=g.
     CHCmax = 50  # maximum item storage capacity for CH. In this rough form not taking size or weight into account UCCmax>=g.    
-    OpTariff = cu(20)  # fee for operator waste handling
-    ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
+    OpTariff = cu(25)  # fee for operator waste handling
+    # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     pUCmin = 0 # min(ItemDep.values())  # minimum price at which UC is willing to sell
+    pExt = cu(8)  # external goods' price
+    CHgain = cu(2)  # static markup for the CH (commission)
     # pCHmax = max(ItemDep.values())  # maximum price at which CH is willing to buy
-    # ClP = (pUCmin + pCHmax)/2  # a tentative static clearing price    
+    # ClP = (pUCmin + pCHmax)/2  # a tentative static clearing price
 
 
 class Subsession(BaseSubsession):
@@ -86,10 +88,14 @@ class Days(Page):
     def error_message(player, actions):
         # PlayerFormValidation(player, actions, Constants.UC_role, Constants.CH_role, Constants.CHCmax, Constants.g, Constants.UCCmax)
         if player.role_own == 'UC':
+            amount = actions['priceUC'] + Constants.CHgain - Constants.pExt
             LHS, RHS = actions['actionSUC'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.UCCmax - player.participant.capac
             if LHS != RHS:
                 return 'The sum of the items in store, pushed to platform and otherwise disposed must equal the generated waste items plus the current storage for all rounds.'
+            if amount > 0:
+                return "The price you are asking per item exceeds that of the item's deposit in the circular economy by " + str(amount) + ". Try a lower one."
         elif player.role_own == 'CH':
+            amount = actions['priceCH'] + Constants.CHgain - Constants.pExt
             LHS1 = actions['actionBCH']
             LHS2 = actions['actionRESell']
             RHS1 = player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
@@ -100,6 +106,8 @@ class Days(Page):
                 return 'You cannot sell or dispose more than you have in store.'
             if player.participant.balance - LHS1 * actions['priceCH'] <= 0:
                 return 'You cannot afford to buy this quantity.'  # TODO consider debt incurrence here
+            if amount > 0:
+                return "The price you are willing to pay per item exceeds that of the item's deposit in the circular economy by " + str(amount) + ". Try a lower one."
 
 
     @staticmethod
@@ -149,7 +157,7 @@ def creating_session(subsession):
 
 def set_payoffs(subsession):
     players = subsession.get_players()
-    UCPayoffnRest(players, 'UC', 'CH', Constants.UCCmax, Constants.CHCmax, Constants.OpTariff)
+    UCPayoffnRest(players, Constants.UCCmax, Constants.CHCmax, Constants.OpTariff)
 
 
 page_sequence = [Days, ResultsWaitPage, Results]

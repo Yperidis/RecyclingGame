@@ -1,16 +1,13 @@
-def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, ConstantsOpTariff):
-    wpatUC = { player : player.wait_page_arrival for player in players if player.role_own == UC_role }  # dictionary of player ID-wait page arrival time
-    wpatCH = { player : player.wait_page_arrival for player in players if player.role_own == CH_role }
-    UCWTsort, CHWTsort = sorted( zip( wpatUC.keys(), wpatUC.values()), key=lambda pair : pair[1] ), sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] )  # sort UC and CH IDs following their waiting time ascending sorting
+def UCPayoffnRest(players, ConstantsUCCmax, ConstantsCHCmax, ConstantsOpTariff):
+    wpatUC = { player : player.wait_page_arrival for player in players if player.role_own == 'UC' }  # dictionary of player ID-wait page arrival time
+    wpatCH = { player : player.wait_page_arrival for player in players if player.role_own == 'CH' }
+    UCWTsort, CHWTsort = sorted( zip( wpatUC.keys(), wpatUC.values()), key=lambda pair : pair[1] ), sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] )  # sort UC and CH IDs following their waiting time ascending
     for UCplayer in UCWTsort:  # "first come" UC order
         UCplayer[0].participant.capac = ConstantsUCCmax - UCplayer[0].actionSUC  # UC recursive capacity relation
         UCplayer[0].participant.store = UCplayer[0].actionSUC  # calculate current UC storage
         for CHplayer in CHWTsort:  # "first come" CH order
             if CHplayer[0].actionD > 0:  # calculate the costs of a potential standard disposal by choice for the CH
-                CHplayer[0].payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the CH payoff
-                CHplayer[0].participant.balance -= ConstantsOpTariff  # update the CH balance
-                CHplayer[0].participant.capac += CHplayer[0].actionD  # update the CH capacity and storage
-                CHplayer[0].participant.store -= CHplayer[0].actionD
+                DefaultOperatorCosts(CHplayer[0], ConstantsOpTariff)
             if UCplayer[0].priceUC <= CHplayer[0].priceCH:  # condition for the trade to take place
                 if CHplayer[0].CHOpenDemand > 0:  # the demand of the CH in question is non-zero
                     UCplayer[0].ClPr = min(UCplayer[0].priceUC, CHplayer[0].priceCH)  # the clearing price
@@ -42,5 +39,23 @@ def UCPayoffnRest(players, UC_role, CH_role, ConstantsUCCmax, ConstantsCHCmax, C
                 continue
         UCplayer[0].sold = UCplayer[0].actionPP - UCplayer[0].UCOpenSupply  # items sold
         if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
-            UCplayer[0].payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the UC payoff
-            UCplayer[0].participant.balance -= ConstantsOpTariff  # update the UC balance
+            DefaultOperatorCosts(UCplayer[0], ConstantsOpTariff)
+
+
+def CHPayoffnRest():
+    wpatCH = { player : player.wait_page_arrival for player in players if player.role_own == 'CH' }  # dictionary of player ID-wait page arrival time
+    wpatRE = { player : player.wait_page_arrival for player in players if player.role_own == 'RE' }
+    CHWTsort, REWTsort = sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] ), sorted( zip( wpatRE.keys(), wpatRE.values()), key=lambda pair : pair[1] )  # sort CH and RE IDs following their waiting time ascending
+    pass
+
+
+def DefaultOperatorCosts(player, ConstantsOpTariff):
+    if player.role_own == 'CH':
+        player.payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the CH payoff
+        player.participant.balance -= ConstantsOpTariff  # update the CH balance
+        player.participant.capac += player.actionD  # update the CH capacity and storage
+        player.participant.store -= player.actionD
+
+    if player.role_own == 'UC':
+        player.payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the UC payoff
+        player.participant.balance -= ConstantsOpTariff  # update the UC balance
