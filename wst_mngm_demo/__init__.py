@@ -12,10 +12,9 @@ class Constants(BaseConstants):
     players_per_group = 3
     # UC_role, CH_role, RE_role = 'UC', 'CH', 'RE'
     num_rounds = 3
-    InitBalance = cu(4000)  # monetary balance (in currency units) at the start of the experiment for UCs. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c), assuming they can afford it.
+    InitUCBalance, InitCHBalance, InitREBalance = cu(4000), cu(500), cu(1000)  # monetary balance (in currency units) at the start of the experiment for UCs. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c), assuming they can afford it.
     g = 5  # rate of waste (item generation per day-round)
-    UCCmax = 6  # maximum item storage capacity for UC. In this rough form not taking size or weight into account UCCmax>=g.
-    CHCmax = 50  # maximum item storage capacity for CH. In this rough form not taking size or weight into account UCCmax>=g.    
+    UCCmax, CHCmax, RECmax = 6, 50, 30  # maximum item storage capacity for UC, CH and RE. In this rough form not taking size or weight into account UCCmax>=g.
     OpTariff = cu(25)  # fee for operator waste handling
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     pUCmin = 0 # min(ItemDep.values())  # minimum price at which UC is willing to sell
@@ -37,12 +36,15 @@ class Player(BasePlayer):
     role_own = models.StringField()
 
     # Action set: actionSUC for "store", actionPP for "push on platform" and actionD for "Dispose through standard means"
+    actionUCBuyBool = models.BooleanField(label="Would you like to buy your necessities from the platform if available?")
     actionSUC = models.IntegerField(min=0, max=Constants.UCCmax, initial=0, label="How many items are you willing to store?")
     actionBCH = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to buy?")
+    actionBRE = models.IntegerField(min=0, max=Constants.RECmax, initial=0, label="How many items are you willing to buy?")
     actionPP = models.IntegerField(min=0, label="How many items are you willing to push to the platform?")
     priceUC = models.CurrencyField(min=Constants.pUCmin, init=Constants.pUCmin, label="Name the price you want to sell for.")
     priceCH = models.CurrencyField(min=0, label="Name the price you are willing to buy for.")
-    actionD = models.IntegerField(min=0, max=Constants.g+Constants.UCCmax, label="How many items are you willing to dispose through standard means?")
+    priceRE = models.CurrencyField(min=0, label="Name the price you are willing to sell for.")
+    actionD = models.IntegerField(min=0, label="How many items are you willing to dispose through standard means?")
     # actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to sell to an RE?")
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
@@ -78,15 +80,16 @@ class Days(Page):
     def get_form_fields(player):
         if player.role_own == 'UC':
             # return ['actionSUC', 'actionPP', 'priceUC', 'actionD', 'WstType']
-            return ['actionSUC', 'actionPP', 'priceUC', 'actionD']            
+            return ['actionUCBuyBool', 'actionSUC', 'actionPP', 'priceUC', 'actionD']            
         elif player.role_own == 'CH':
             # return ['actionBCH', 'actionFwd', 'actionRESell', 'priceCH', 'WstType']
             return ['actionBCH', 'actionRESell', 'priceCH', 'actionD']
+        else:
+            return []
 
 
     @staticmethod
     def error_message(player, actions):
-        # PlayerFormValidation(player, actions, Constants.UC_role, Constants.CH_role, Constants.CHCmax, Constants.g, Constants.UCCmax)
         if player.role_own == 'UC':
             amount = actions['priceUC'] + Constants.CHgain - Constants.pExt
             LHS, RHS = actions['actionSUC'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.UCCmax - player.participant.capac
@@ -108,6 +111,11 @@ class Days(Page):
                 return 'You cannot afford to buy this quantity.'  # TODO consider debt incurrence here
             if amount > 0:
                 return "The price you are willing to pay per item exceeds that of the item's deposit in the circular economy by " + str(amount) + ". Try a lower one."
+        else:
+            # if actions['priceRE'] > Constants.pExt:
+            #     return 'You are trying to sell for a higher price than the external (raw) desposit ' + str(Constants.pExt) + '. Try a lower one.'
+            # if player.participant.balance - actions['actionBRE'] * 
+            pass  # TODO
 
 
     @staticmethod
@@ -131,33 +139,11 @@ class Results(Page):
 
 
 def creating_session(subsession):
-    new_structure = [list(range(1, Constants.players_per_group+1))]  # prerequisite to set the number of players in a tabular structure for grouping purposes
-    subsession.set_group_matrix(new_structure)
-    players = subsession.get_players()
-    subsession.group_randomly(fixed_id_in_group=True)  # for grouping players randomly upon initialisation but keeping roles constant throughout the rounds    
-    roles = ['UC', 'CH', 'RE']
-    num_UCCH = len(roles) - 1
-
-    for player in players:
-        if player.id_in_group == 1:
-            player.role_own = roles[2]
-        elif player.id_in_group % num_UCCH == 1:
-            player.role_own = roles[0]
-        else:
-            player.role_own = roles[1]
-        if player.round_number == 1 and (player.role_own == 'UC' or player.role_own == 'CH'):
-            if player.role_own == 'UC':
-                player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
-            else:
-                player.participant.capac = Constants.CHCmax
-            # player.participant.traded = 0  # initialization for a flag on whether the PP or the SCH action has been spent during the payoff process
-            player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
-            player.participant.balance = Constants.InitBalance  # initialize balance
+    Initialization(subsession, Constants)
 
 
 def set_payoffs(subsession):
-    players = subsession.get_players()
-    UCPayoffnRest(players, Constants.UCCmax, Constants.CHCmax, Constants.OpTariff)
+    UCPayoffnRest(subsession, Constants)
 
 
 page_sequence = [Days, ResultsWaitPage, Results]
