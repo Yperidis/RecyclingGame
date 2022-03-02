@@ -55,6 +55,7 @@ class Player(BasePlayer):
     CHOpenDemand = models.IntegerField()
     sold = models.IntegerField(initial=0)
     bought = models.IntegerField(initial=0)
+    ExDat = models.LongStringField(initial='{"5": [2, 4], "6": [1, 2]}')  # a field of variable length where a dictionary of the item No - ID and price are going to be stored for diagnostics at the results.
     ClPr = models.CurrencyField()  #  a field to keep track of the clearing price for each player
 
 
@@ -67,13 +68,26 @@ class Days(Page):
     def vars_for_template(player: Player):
         if player.role_own == "RE":
             items_to_handle = 0
+            return dict(items_to_handle=items_to_handle)
         elif player.role_own == "UC":
             items_to_handle = player.participant.store + Constants.g
+            return dict(items_to_handle=items_to_handle)
         else:
+            import json
             items_to_handle = player.participant.store
-        return dict(
-            items_to_handle=items_to_handle
-        )
+            ExchangeData = json.loads(player.ExDat)
+            print(ExchangeData)
+            # IDs, Bought, Price = [], [], []
+            ExDat = []
+            for ID in ExchangeData:
+                ExchangeData[ID].insert(0,ID)
+                ExDat.append(ExchangeData[ID])
+                # IDs.append(ID)
+                # Bought.append(ExchangeData[ID][0])  # list of UC IDs and list of list of the UCs' No of items traded and at which price
+                # Price.append(ExchangeData[ID][1])
+            print(ExDat)
+            # test = zip(IDs,Bought,Price)
+            return dict(items_to_handle=items_to_handle, ExDat=ExDat)
 
 
     @staticmethod
@@ -123,7 +137,7 @@ class Days(Page):
         if player.role_own == 'UC':
             player.UCOpenSupply = player.actionPP  # flags for keeping track of what was actually sold and bought to be displayed at the results
         elif player.role_own == 'CH':            
-            player.CHOpenDemand = player.actionBCH
+                player.CHOpenDemand = player.actionBCH
 
         import time
 

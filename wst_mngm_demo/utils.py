@@ -25,4 +25,3 @@ def Initialization(subsession, Constants):
                 player.participant.balance = Constants.InitREBalance
             # player.participant.traded = 0  # initialization for a flag on whether the PP or the SCH action has been spent during the payoff process
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
-            player.participant.ExDat = dict()  # constructor for item-ID exchanges between the different players

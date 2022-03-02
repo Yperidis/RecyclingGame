@@ -1,5 +1,6 @@
 def UCPayoffnRest(subsession, Constants):
 # def UCPayoffnRest(subsession, ConstantsUCCmax, ConstantsCHCmax, ConstantsOpTariff):
+    import json
     players = subsession.get_players()
     wpatUC = { player : player.wait_page_arrival for player in players if player.role_own == 'UC' }  # dictionary of player ID-wait page arrival time
     wpatCH = { player : player.wait_page_arrival for player in players if player.role_own == 'CH' }
@@ -23,6 +24,7 @@ def UCPayoffnRest(subsession, Constants):
                         CHplayer[0].payoff -= UCplayer[0].actionPP * UCplayer[0].ClPr # ConstantsClP
                         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
                         CHplayer[0].participant.capac -= UCplayer[0].actionPP  # CH recursive capacity relation
+                        CHplayer[0].ExDat += json.dumps( { CHplayer[0].id_in_group : (CHplayer[0].bought, float( CHplayer[0].payoff) ) } )
                     else:  # partial fulfillment of UC offer from available demand (CH)
                         CHplayer[0].CHOpenDemand -= CHplayer[0].actionBCH  # track the remaining demand of the CH in question
                         CHplayer[0].bought = CHplayer[0].actionBCH  # items bought
@@ -32,6 +34,7 @@ def UCPayoffnRest(subsession, Constants):
                         CHplayer[0].payoff -= CHplayer[0].actionBCH * UCplayer[0].ClPr #ConstantsClP
                         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
                         CHplayer[0].participant.capac -= CHplayer[0].actionBCH  # CH recursive capacity relation
+                        CHplayer[0].ExDat += json.dumps( { CHplayer[0].id_in_group : [ CHplayer[0].bought, float( CHplayer[0].payoff) ] } )
                     CHplayer[0].participant.store = Constants.CHCmax - CHplayer[0].participant.capac # calculate current CH storage
                     if UCplayer[0].UCOpenSupply == 0:  # if the offer of the UC in question has been spent proceed to the next UC (case of PP=0 accounted for)
                         break
