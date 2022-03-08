@@ -85,9 +85,13 @@ class Days(Page):
                 # IDs.append(ID)
                 # Bought.append(ExchangeData[ID][0])  # list of UC IDs and list of list of the UCs' No of items traded and at which price
                 # Price.append(ExchangeData[ID][1])
-            print(ExDat)
+            print(ExDat)     
+            html = ''           
+            for item in ExDat:
+                html += '<td>From UC<sub>' + item[0] + '</sub> bought ' + str(item[1]) + ' for price ' + str(item[2]) + '</td>\n'
+            print(html)
             # test = zip(IDs,Bought,Price)
-            return dict(items_to_handle=items_to_handle, ExDat=ExDat)
+            return dict(items_to_handle=items_to_handle, ExDat=ExDat, html=html)
 
 
     @staticmethod
