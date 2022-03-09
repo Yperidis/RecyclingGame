@@ -9,7 +9,7 @@ Your app description
 
 class Constants(BaseConstants):
     name_in_url = 'waste_management_demo'
-    players_per_group = 3
+    players_per_group = 4
     # UC_role, CH_role, RE_role = 'UC', 'CH', 'RE'
     num_rounds = 3
     InitUCBalance, InitCHBalance, InitREBalance = cu(4000), cu(500), cu(1000)  # monetary balance (in currency units) at the start of the experiment for UCs. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c), assuming they can afford it.
@@ -55,7 +55,7 @@ class Player(BasePlayer):
     CHOpenDemand = models.IntegerField()
     sold = models.IntegerField(initial=0)
     bought = models.IntegerField(initial=0)
-    ExDat = models.LongStringField(initial='{"5": [2, 4], "6": [1, 2]}')  # a field of variable length where a dictionary of the item No - ID and price are going to be stored for diagnostics at the results.
+    ExDat = models.LongStringField(initial='')  # a field of variable length where a dictionary of the item No - ID and price are going to be stored for diagnostics at the results.
     ClPr = models.CurrencyField()  #  a field to keep track of the clearing price for each player
 
 
@@ -68,30 +68,11 @@ class Days(Page):
     def vars_for_template(player: Player):
         if player.role_own == "RE":
             items_to_handle = 0
-            return dict(items_to_handle=items_to_handle)
         elif player.role_own == "UC":
             items_to_handle = player.participant.store + Constants.g
-            return dict(items_to_handle=items_to_handle)
         else:
-            import json
             items_to_handle = player.participant.store
-            ExchangeData = json.loads(player.ExDat)
-            print(ExchangeData)
-            # IDs, Bought, Price = [], [], []
-            ExDat = []
-            for ID in ExchangeData:
-                ExchangeData[ID].insert(0,ID)
-                ExDat.append(ExchangeData[ID])
-                # IDs.append(ID)
-                # Bought.append(ExchangeData[ID][0])  # list of UC IDs and list of list of the UCs' No of items traded and at which price
-                # Price.append(ExchangeData[ID][1])
-            print(ExDat)     
-            html = ''           
-            for item in ExDat:
-                html += '<td>From UC<sub>' + item[0] + '</sub> bought ' + str(item[1]) + ' for price ' + str(item[2]) + '</td>\n'
-            print(html)
-            # test = zip(IDs,Bought,Price)
-            return dict(items_to_handle=items_to_handle, ExDat=ExDat, html=html)
+        return dict(items_to_handle=items_to_handle)
 
 
     @staticmethod
@@ -153,7 +134,23 @@ class ResultsWaitPage(WaitPage):
 
 
 class Results(Page):
-    pass
+    def vars_for_template(player: Player):
+        if player.role_own == "CH":
+            import json
+            print(player.ExDat)
+            ExchangeData = json.loads(player.ExDat)
+            print(ExchangeData)
+            ExDat = []
+            for ID in ExchangeData:
+                ExchangeData[ID].insert(0,ID)
+                ExDat.append(ExchangeData[ID])
+            print(ExDat)
+            html = '<td>'
+            for item in ExDat:
+                html += 'From UC<sub>' + item[0] + '</sub> bought ' + str(item[1]) + ' for price ' + str(item[2]) + '<br>'
+            html += '</td>'
+            print(html)
+            return dict(html=html)
 
 
 def creating_session(subsession):

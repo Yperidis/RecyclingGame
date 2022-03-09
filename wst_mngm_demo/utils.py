@@ -3,16 +3,16 @@ def Initialization(subsession, Constants):
     subsession.set_group_matrix(new_structure)
     players = subsession.get_players()
     subsession.group_randomly(fixed_id_in_group=True)  # for grouping players randomly upon initialisation but keeping roles constant throughout the rounds    
-    roles = ['UC', 'CH', 'RE']
+    roles = ['UC', 'CH', 'RE']  # assuming three roles, the loop below will always distribute the roles cyclically up to the number of players in the group
     num_UCCH = len(roles) - 1
 
     for player in players:
         if player.id_in_group == 1:
-            player.role_own = roles[2]
-        elif player.id_in_group % num_UCCH == 1:
-            player.role_own = roles[0]
+            player.role_own = roles[2]  # RE assignment
+        elif player.id_in_group % num_UCCH == 0:
+            player.role_own = roles[0]  # UC assignment
         else:
-            player.role_own = roles[1]
+            player.role_own = roles[1]  # CH assignment
         if player.round_number == 1:# and (player.role_own == 'UC' or player.role_own == 'CH'):
             if player.role_own == 'UC':
                 player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
@@ -23,5 +23,4 @@ def Initialization(subsession, Constants):
             else:
                 player.participant.capac = Constants.RECmax
                 player.participant.balance = Constants.InitREBalance
-            # player.participant.traded = 0  # initialization for a flag on whether the PP or the SCH action has been spent during the payoff process
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)

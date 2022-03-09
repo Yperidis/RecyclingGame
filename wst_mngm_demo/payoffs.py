@@ -5,6 +5,7 @@ def UCPayoffnRest(subsession, Constants):
     wpatUC = { player : player.wait_page_arrival for player in players if player.role_own == 'UC' }  # dictionary of player ID-wait page arrival time
     wpatCH = { player : player.wait_page_arrival for player in players if player.role_own == 'CH' }
     UCWTsort, CHWTsort = sorted( zip( wpatUC.keys(), wpatUC.values()), key=lambda pair : pair[1] ), sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] )  # sort UC and CH IDs following their waiting time ascending
+    UCtemp = {}  # dictionary-ledger to store UC transactions
     for UCplayer in UCWTsort:  # "first come" UC order
         UCplayer[0].participant.capac = Constants.UCCmax - UCplayer[0].actionSUC  # UC recursive capacity relation
         UCplayer[0].participant.store = UCplayer[0].actionSUC  # calculate current UC storage
@@ -24,7 +25,8 @@ def UCPayoffnRest(subsession, Constants):
                         CHplayer[0].payoff -= UCplayer[0].actionPP * UCplayer[0].ClPr # ConstantsClP
                         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
                         CHplayer[0].participant.capac -= UCplayer[0].actionPP  # CH recursive capacity relation
-                        CHplayer[0].ExDat += json.dumps( { CHplayer[0].id_in_group : (CHplayer[0].bought, float( CHplayer[0].payoff) ) } )
+                        UCtemp.update( { UCplayer[0].id_in_group : (UCplayer[0].actionPP - UCplayer[0].UCOpenSupply, str( UCplayer[0].payoff) ) } )
+                        print(UCtemp)
                     else:  # partial fulfillment of UC offer from available demand (CH)
                         CHplayer[0].CHOpenDemand -= CHplayer[0].actionBCH  # track the remaining demand of the CH in question
                         CHplayer[0].bought = CHplayer[0].actionBCH  # items bought
@@ -34,11 +36,13 @@ def UCPayoffnRest(subsession, Constants):
                         CHplayer[0].payoff -= CHplayer[0].actionBCH * UCplayer[0].ClPr #ConstantsClP
                         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
                         CHplayer[0].participant.capac -= CHplayer[0].actionBCH  # CH recursive capacity relation
-                        CHplayer[0].ExDat += json.dumps( { CHplayer[0].id_in_group : [ CHplayer[0].bought, float( CHplayer[0].payoff) ] } )
+                        UCtemp.update( { UCplayer[0].id_in_group : (UCplayer[0].actionPP - UCplayer[0].UCOpenSupply, str( UCplayer[0].payoff) ) } )  
+                    CHplayer[0].ExDat = json.dumps( UCtemp )  # parse for passing to the template
                     CHplayer[0].participant.store = Constants.CHCmax - CHplayer[0].participant.capac # calculate current CH storage
                     if UCplayer[0].UCOpenSupply == 0:  # if the offer of the UC in question has been spent proceed to the next UC (case of PP=0 accounted for)
                         break
                 else:  # if the CH in question has met their demand proceed to the next CH
+                    UCtemp = {}  # reset ledger for UC transactions
                     continue
             else:  # no trade takes place for the given pair. Proceed to the next CH.
                 continue
