@@ -22,18 +22,30 @@ from os import environ
 #]
 
 
-#SESSION_CONFIGS = [
+# SESSION_CONFIGS = [
+#    dict(
+#        name='prisoner',
+#        num_demo_participants=2,
+#        use_browser_bots=True,
+#        app_sequence=['prisoner']
+#    ),
+# ]
+
+
+# SESSION_CONFIGS = [
 #    dict(
 #        name='my_public_goods',
 #        num_demo_participants=3,
+#        use_browser_bots=True,
 #        app_sequence=['my_public_goods']
 #    ),
-#]
+# ]
 
 SESSION_CONFIGS = [
     dict(
         name='wst_mngm_demo',
         num_demo_participants=4,
+        use_browser_bots=False,
         app_sequence=['wst_mngm_demo']
     ),
 ]

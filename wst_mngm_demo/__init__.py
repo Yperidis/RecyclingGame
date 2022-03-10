@@ -137,19 +137,19 @@ class Results(Page):
     def vars_for_template(player: Player):
         if player.role_own == "CH":
             import json
-            print(player.ExDat)
+            # print(player.ExDat)
             ExchangeData = json.loads(player.ExDat)
-            print(ExchangeData)
+            # print(ExchangeData)
             ExDat = []
             for ID in ExchangeData:
                 ExchangeData[ID].insert(0,ID)
                 ExDat.append(ExchangeData[ID])
-            print(ExDat)
+            # print(ExDat)
             html = '<td>'
             for item in ExDat:
                 html += 'From UC<sub>' + item[0] + '</sub> bought ' + str(item[1]) + ' for price ' + str(item[2]) + '<br>'
             html += '</td>'
-            print(html)
+            # print(html)
             return dict(html=html)
 
 

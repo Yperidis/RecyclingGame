@@ -1,5 +1,4 @@
 def UCPayoffnRest(subsession, Constants):
-# def UCPayoffnRest(subsession, ConstantsUCCmax, ConstantsCHCmax, ConstantsOpTariff):
     import json
     players = subsession.get_players()
     wpatUC = { player : player.wait_page_arrival for player in players if player.role_own == 'UC' }  # dictionary of player ID-wait page arrival time
@@ -16,27 +15,32 @@ def UCPayoffnRest(subsession, Constants):
                 if CHplayer[0].CHOpenDemand > 0:  # the demand of the CH in question is non-zero
                     UCplayer[0].ClPr = min(UCplayer[0].priceUC, CHplayer[0].priceCH)  # the clearing price
                     CHplayer[0].ClPr = UCplayer[0].ClPr
-                    if UCplayer[0].actionPP <= CHplayer[0].actionBCH:  # check the relationship between the UC offer and the CH demand
-                        UCplayer[0].UCOpenSupply -= UCplayer[0].actionPP  # track the remaining supply of the UC in question
-                        CHplayer[0].CHOpenDemand -= UCplayer[0].actionPP  # same for CH
-                        CHplayer[0].bought = CHplayer[0].actionBCH - CHplayer[0].CHOpenDemand  # items bought
-                        UCplayer[0].payoff = UCplayer[0].actionPP * UCplayer[0].ClPr # ConstantsClP  # pay per the UC PP quantity
+                    if UCplayer[0].UCOpenSupply <= CHplayer[0].CHOpenDemand:#UCplayer[0].actionPP <= CHplayer[0].actionBCH:  # check the relationship between the UC offer and the CH demand
+                        # print((UCplayer[0].actionPP,UCplayer[0].UCOpenSupply), (CHplayer[0].actionBCH,CHplayer[0].CHOpenDemand))
+                        CHplayer[0].CHOpenDemand -= UCplayer[0].UCOpenSupply#UCplayer[0].actionPP  # track the remaining supply of the CH in question
+                        CHplayer[0].bought = UCplayer[0].UCOpenSupply#CHplayer[0].actionBCH - CHplayer[0].CHOpenDemand  # items bought
+                        UCplayer[0].payoff = UCplayer[0].UCOpenSupply * UCplayer[0].ClPr # ConstantsClP  # pay per the UC PP quantity
                         UCplayer[0].participant.balance = UCplayer[0].participant.balance + UCplayer[0].payoff  # track the UC balance
-                        CHplayer[0].payoff -= UCplayer[0].actionPP * UCplayer[0].ClPr # ConstantsClP
+                        CHplayer[0].payoff = -UCplayer[0].UCOpenSupply * UCplayer[0].ClPr # ConstantsClP
                         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
-                        CHplayer[0].participant.capac -= UCplayer[0].actionPP  # CH recursive capacity relation
+                        # print(CHplayer[0].participant.balance)
+                        CHplayer[0].participant.capac -= UCplayer[0].UCOpenSupply  # CH recursive capacity relation
+                        UCplayer[0].UCOpenSupply = 0#UCplayer[0].actionPP  # same for UC
                         UCtemp.update( { UCplayer[0].id_in_group : (UCplayer[0].actionPP - UCplayer[0].UCOpenSupply, str( UCplayer[0].payoff) ) } )
-                        print(UCtemp)
-                    else:  # partial fulfillment of UC offer from available demand (CH)
-                        CHplayer[0].CHOpenDemand -= CHplayer[0].actionBCH  # track the remaining demand of the CH in question
-                        CHplayer[0].bought = CHplayer[0].actionBCH  # items bought
-                        UCplayer[0].UCOpenSupply -= CHplayer[0].actionBCH  # same for the UC
-                        UCplayer[0].payoff = CHplayer[0].actionBCH * UCplayer[0].ClPr #ConstantsClP  # pay per the CH stor quantity
+                        # print((UCplayer[0].actionPP,UCplayer[0].UCOpenSupply), (CHplayer[0].actionBCH,CHplayer[0].CHOpenDemand))
+                    else:#if UCplayer[0].actionPP > CHplayer[0].CHOpenDemand and CHplayer[0].CHOpenDemand <= UCplayer[0].UCOpenSupply:  # partial fulfillment of UC offer from available demand (CH)
+                        # print((UCplayer[0].actionPP,UCplayer[0].UCOpenSupply), (CHplayer[0].actionBCH,CHplayer[0].CHOpenDemand), 'Sec')
+                        CHplayer[0].bought = CHplayer[0].CHOpenDemand  # items bought
+                        UCplayer[0].UCOpenSupply -= CHplayer[0].CHOpenDemand  # same for the UC
+                        UCplayer[0].payoff = CHplayer[0].CHOpenDemand * UCplayer[0].ClPr #ConstantsClP  # pay per the CH stor quantity
                         UCplayer[0].participant.balance += UCplayer[0].payoff  # track the UC balance
-                        CHplayer[0].payoff -= CHplayer[0].actionBCH * UCplayer[0].ClPr #ConstantsClP
+                        CHplayer[0].payoff = -CHplayer[0].CHOpenDemand * UCplayer[0].ClPr #ConstantsClP
                         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
-                        CHplayer[0].participant.capac -= CHplayer[0].actionBCH  # CH recursive capacity relation
-                        UCtemp.update( { UCplayer[0].id_in_group : (UCplayer[0].actionPP - UCplayer[0].UCOpenSupply, str( UCplayer[0].payoff) ) } )  
+                        # print(CHplayer[0].participant.balance, CHplayer[0].payoff)
+                        CHplayer[0].participant.capac -= CHplayer[0].CHOpenDemand  # CH recursive capacity relation
+                        CHplayer[0].CHOpenDemand = 0#CHplayer[0].actionBCH  # track the remaining demand of the CH in question
+                        UCtemp.update( { UCplayer[0].id_in_group : (UCplayer[0].actionPP - UCplayer[0].UCOpenSupply, str( UCplayer[0].payoff) ) } )
+                        # print((UCplayer[0].actionPP,UCplayer[0].UCOpenSupply), (CHplayer[0].actionBCH,CHplayer[0].CHOpenDemand), 'Sec')
                     CHplayer[0].ExDat = json.dumps( UCtemp )  # parse for passing to the template
                     CHplayer[0].participant.store = Constants.CHCmax - CHplayer[0].participant.capac # calculate current CH storage
                     if UCplayer[0].UCOpenSupply == 0:  # if the offer of the UC in question has been spent proceed to the next UC (case of PP=0 accounted for)
