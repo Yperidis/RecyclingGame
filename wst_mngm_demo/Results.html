@@ -64,17 +64,12 @@
             <td>{{ player.participant.store }}</td>
             {{ if player.role_own == 'UC' }}
                 <td>{{ player.actionPP }}</td>
-                <td>{{ player.sold }}</td>
+                    {{ html }}
                 <td>{{ player.actionD }}</td>
                 <td>{{ player.UCOpenSupply }}</td>
             {{ endif }}
             {{ if player.role_own == 'CH' }}
                 <td>{{ player.actionBCH }}</td>
-                {#
-                {{ for item in ExDat }}
-                    <td>From UC<sub>{{item.0}}</sub> bought {{item.1}} for price {{item.2}} </td>
-                {{ endfor }}
-                #}
                 {{ html }}
                 {# <td>{{ player.bought }}</td> #}
                 <td>TBD</td>

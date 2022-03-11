@@ -17,7 +17,7 @@ class Constants(BaseConstants):
     UCCmax, CHCmax, RECmax = 6, 50, 30  # maximum item storage capacity for UC, CH and RE. In this rough form not taking size or weight into account UCCmax>=g.
     OpTariff = cu(25)  # fee for operator waste handling
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
-    pUCmin = 0 # min(ItemDep.values())  # minimum price at which UC is willing to sell
+    pUCmin = cu(5) # min(ItemDep.values())  # minimum price at which UC is willing to sell
     pExt = cu(8)  # external goods' price
     CHgain = cu(2)  # static markup for the CH (commission)
     # pCHmax = max(ItemDep.values())  # maximum price at which CH is willing to buy
@@ -41,12 +41,12 @@ class Player(BasePlayer):
     actionBCH = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to buy?")
     actionBRE = models.IntegerField(min=0, max=Constants.RECmax, initial=0, label="How many items are you willing to buy?")
     actionPP = models.IntegerField(min=0, label="How many items are you willing to push to the platform?")
-    priceUC = models.CurrencyField(min=Constants.pUCmin, init=Constants.pUCmin, label="Name the price you want to sell for.")
-    priceCH = models.CurrencyField(min=0, label="Name the price you are willing to buy for.")
+    priceUC = models.CurrencyField(min=cu(0), initial=cu(5), label="Name the price you want to sell for.")
+    priceCH = models.CurrencyField(min=0, initial=cu(5), label="Name the price you are willing to buy for.")
     priceRE = models.CurrencyField(min=0, label="Name the price you are willing to sell for.")
-    actionD = models.IntegerField(min=0, label="How many items are you willing to dispose through standard means?")
+    actionD = models.IntegerField(min=0, initial=0, label="How many items are you willing to dispose through standard means?")
     # actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
-    actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to sell to an RE?")
+    actionRESell = models.IntegerField(min=0, initial=0, max=Constants.CHCmax, label="How many items are you willing to sell to an RE?")
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
     # Fields not set by participant for payoff calculation
@@ -55,7 +55,8 @@ class Player(BasePlayer):
     CHOpenDemand = models.IntegerField()
     sold = models.IntegerField(initial=0)
     bought = models.IntegerField(initial=0)
-    ExDat = models.LongStringField(initial='')  # a field of variable length where a dictionary of the item No - ID and price are going to be stored for diagnostics at the results.
+    UCExDat = models.LongStringField(initial='')  # a field of variable length where a dictionary of the item UC No - ID and price are going to be stored for diagnostics at the results.
+    CHExDat = models.LongStringField(initial='')  # a field of variable length where a dictionary of the item CH No - ID and price are going to be stored for diagnostics at the results.
     ClPr = models.CurrencyField()  #  a field to keep track of the clearing price for each player
 
 
@@ -79,7 +80,7 @@ class Days(Page):
     def get_form_fields(player):
         if player.role_own == 'UC':
             # return ['actionSUC', 'actionPP', 'priceUC', 'actionD', 'WstType']
-            return ['actionUCBuyBool', 'actionSUC', 'actionPP', 'priceUC', 'actionD']            
+            return ['actionSUC', 'actionPP', 'priceUC', 'actionD']            
         elif player.role_own == 'CH':
             # return ['actionBCH', 'actionFwd', 'actionRESell', 'priceCH', 'WstType']
             return ['actionBCH', 'actionRESell', 'priceCH', 'actionD']
@@ -135,22 +136,46 @@ class ResultsWaitPage(WaitPage):
 
 class Results(Page):
     def vars_for_template(player: Player):
-        if player.role_own == "CH":
-            import json
-            # print(player.ExDat)
-            ExchangeData = json.loads(player.ExDat)
-            # print(ExchangeData)
-            ExDat = []
-            for ID in ExchangeData:
-                ExchangeData[ID].insert(0,ID)
-                ExDat.append(ExchangeData[ID])
-            # print(ExDat)
-            html = '<td>'
-            for item in ExDat:
-                html += 'From UC<sub>' + item[0] + '</sub> bought ' + str(item[1]) + ' for price ' + str(item[2]) + '<br>'
-            html += '</td>'
-            # print(html)
-            return dict(html=html)
+        if player.role_own == "UC":  # passing the tracked CH trades for the UC in question
+            if player.CHExDat == '':
+                html = '<td>0</td>'
+                return dict(html=html)
+            else:
+                import json
+                # print(player.ExDat)
+                ExchangeData = json.loads(player.CHExDat)
+                # print(ExchangeData)
+                ExDat = []
+                for ID in ExchangeData:
+                    ExchangeData[ID].insert(0,ID)
+                    ExDat.append(ExchangeData[ID])
+                # print(ExDat)
+                html = '<td>'
+                for item in ExDat:
+                    html += 'To CH<sub>' + item[0] + '</sub> sold ' + str(item[1]) + ' item for ' + str(item[2]) + '<br>'
+                html += '</td>'
+                # print(html)
+                return dict(html=html)                            
+        if player.role_own == "CH":  # passing the tracked UC trades for the CH in question
+            if player.UCExDat == '':
+                html = '<td>0</td>'
+                return dict(html=html)
+            else:
+                import json
+                # print(player.ExDat)
+                ExchangeData = json.loads(player.UCExDat)
+                # print(ExchangeData)
+                ExDat = []
+                for ID in ExchangeData:
+                    ExchangeData[ID].insert(0,ID)
+                    ExDat.append(ExchangeData[ID])
+                # print(ExDat)
+                html = '<td>'
+                for item in ExDat:
+                    html += 'From UC<sub>' + item[0] + '</sub> bought ' + str(item[1]) + ' item for ' + str(item[2]) + '<br>'
+                html += '</td>'
+                # print(html)
+                return dict(html=html)
 
 
 def creating_session(subsession):
