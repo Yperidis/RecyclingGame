@@ -8,6 +8,7 @@
     End of day {{ player.round_number }} as {{ player.role_own }} role.
 </h2>
 
+{{ comment }}
 {{ if player.role_own == 'UC' and player.sold > 0 }}
     The clearing price is {{ player.ClPr }}. <br>
 {{ endif }}
@@ -23,62 +24,79 @@
 {{ if player.role_own == 'CH' and player.actionD > 0 }}
     The default operator's tariff is {{ Constants.OpTariff }}. <br> <br>
 {{ endif }}
+{{ endcomment }}
 
 {{ if player.role_own == 'UC' or player.role_own == 'CH' }}
 
 <table class="table results-table">
     <thead>
         <tr>
-            <th scope="col">Balance</th>
-            <th scope="col">Stored</th>
             {{ if player.role_own == 'UC' }}
-                <th colspan="2">Pushed to platform</th>
-                <th colspan="2">Disposed through standard means</th>
+                <th scope="col">Stored</th>
+                <th scope="col">Pushed to platform</th>
+                <th scope="col">Sold on platform</th>
+                <th scope="col">Not sold to any CH</th>
             {{ endif }}
             {{ if player.role_own == 'CH' }}
-                <th colspan="2">Bought from UC (IDs) </th>
-                <th scope="col">Sold to RE (IDs)</th>
-                <th scope="col">Disposed through standard means</th>
+                <th scope="col">Bought from UC</th>
+                <th scope="col">Sold to RE</th>
+                <th scope="col">Stored</th>
             {{ endif }}
+            <th scope="col">Disposed through standard means</th>
+            <th scope="col">Payoff</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td></td>
-            <td></td>
             {{ if player.role_own == 'UC' }}
-                <td>Offered</td>
-                <td>Sold to CH (IDs)</td>
-                <td>Willingly</td>
-                <td>Not sold to any CH</td>
-            {{ endif }}
-            {{ if player.role_own == 'CH' }}
-                <td>Demanded</td>
-                <td>Bought</td>
-                <td></td>
-                <td></td>
-            {{ endif }}
-        </tr>
-        <tr>
-            <td>{{ player.participant.balance }}</td>
-            <td>{{ player.participant.store }}</td>
-            {{ if player.role_own == 'UC' }}
+                <td>{{ player.actionSUC }}</td>
                 <td>{{ player.actionPP }}</td>
-                    {{ html }}
-                <td>{{ player.actionD }}</td>
+                <td>{{ player.sold }}</td>
                 <td>{{ player.UCOpenSupply }}</td>
+            {{ else }}
+                <td>{{ player.bought }}</td>
+                <td>{{ player.sold }}</td>
+                <td>TODO</td>
             {{ endif }}
-            {{ if player.role_own == 'CH' }}
-                <td>{{ player.actionBCH }}</td>
-                {{ html }}
-                {# <td>{{ player.bought }}</td> #}
-                <td>TBD</td>
-                <td>{{ player.actionD }}</td>
-            {{ endif }}
+            <td>{{ player.actionD }}</td>
+            <td>{{ player.payoff }}</td>
         </tr>
     </tbody>
 </table>
+
 <br>
+
+<table class="table results-table">
+    <thead>
+        <tr>
+            <th scope="col">Balance</th>
+            <th scope="col">Items stored</th>
+            <th scope="col">Capacity</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ player.participant.balance }}</td>
+            <td>{{ player.participant.store }}</td>
+            <td>{{ player.participant.capac }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<br>
+
+<table class="table results-table">
+    <thead>
+        <tr>
+            <th scope="col">ID of {{ if player.role_own == 'UC' }}CH{{ else }}UC{{ endif }}</th>
+            <th scope="col">Items {{ if player.role_own == 'UC' }}sold{{ else }}bought{{ endif }}</th>
+            <th scope="col">Price</th>
+        </tr>
+    </thead>
+    <tbody id="transactions">
+    </tbody>
+</table>
+
 {{ else }}
   <p>
       You might have bought some items.
@@ -99,13 +117,14 @@
     }
     .results-table td, .results-table th {
         padding: 8px;
+        border: 1px solid #ddd;
     }
 
     .results-table tr:nth-child(odd){
         background-color: #f2f2f2;
     }
 
-    .results-table tr th:nth-of-type(2),
+/*    .results-table tr th:nth-of-type(2),
     .results-table tr th:nth-of-type(3),
     .results-table tr td:nth-of-type(2),
     .results-table tr td:nth-of-type(4){
@@ -118,7 +137,7 @@
     .results-table tr td:nth-of-type(1),
     .results-table tr td:nth-of-type(6){
         border: 1px solid #ddd;
-    }
+    }*/
 
     .results-table th {
         padding-top: 12px;
@@ -127,4 +146,24 @@
         color: white;
     }
 </style>
+{{ endblock }}
+
+
+{{ block scripts }}
+<script>
+    let ids = js_vars.ids;
+    let items = js_vars.items_count;
+    let prices = js_vars.prices;
+    let transactions = document.getElementById("transactions");
+    let transactions_list = "";
+
+    if (ids.length === 0) {
+        transactions_list += "<tr><td colspan='3'>You did not trade any items this round.</td></tr>";
+    } else {
+        for(let i = 0; i < ids.length; i++) {
+            transactions_list += "<tr><td>" + ids[i] + "</td><td>" + items[i] + "</td><td>" + prices[i] + "</td></tr>";
+        }
+    }
+    transactions.innerHTML = transactions_list;
+</script>
 {{ endblock }}

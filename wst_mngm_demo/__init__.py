@@ -9,7 +9,7 @@ Your app description
 
 class Constants(BaseConstants):
     name_in_url = 'waste_management_demo'
-    players_per_group = 4
+    players_per_group = 5
     # UC_role, CH_role, RE_role = 'UC', 'CH', 'RE'
     num_rounds = 3
     InitUCBalance, InitCHBalance, InitREBalance = cu(4000), cu(500), cu(1000)  # monetary balance (in currency units) at the start of the experiment for UCs. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c), assuming they can afford it.
@@ -29,7 +29,7 @@ class Subsession(BaseSubsession):
 
 
 class Group(BaseGroup):
-    pass
+    ExDat = models.StringField()
 
 
 class Player(BasePlayer):
@@ -55,9 +55,9 @@ class Player(BasePlayer):
     CHOpenDemand = models.IntegerField()
     sold = models.IntegerField(initial=0)
     bought = models.IntegerField(initial=0)
-    UCExDat = models.LongStringField(initial='')  # a field of variable length where a dictionary of the item UC No - ID and price are going to be stored for diagnostics at the results.
-    CHExDat = models.LongStringField(initial='')  # a field of variable length where a dictionary of the item CH No - ID and price are going to be stored for diagnostics at the results.
-    ClPr = models.CurrencyField()  #  a field to keep track of the clearing price for each player
+    # UCExDat = models.LongStringField(initial='')  # a field of variable length where a dictionary of the item UC No - ID and price are going to be stored for diagnostics at the results.
+    # CHExDat = models.LongStringField(initial='')  # a field of variable length where a dictionary of the item CH No - ID and price are going to be stored for diagnostics at the results.
+    # ClPr = models.CurrencyField()  #  a field to keep track of the clearing price for each player
 
 
 # PAGES
@@ -123,7 +123,7 @@ class Days(Page):
         if player.role_own == 'UC':
             player.UCOpenSupply = player.actionPP  # flags for keeping track of what was actually sold and bought to be displayed at the results
         elif player.role_own == 'CH':            
-                player.CHOpenDemand = player.actionBCH
+            player.CHOpenDemand = player.actionBCH
 
         import time
 
@@ -135,55 +135,69 @@ class ResultsWaitPage(WaitPage):
 
 
 class Results(Page):
-    def vars_for_template(player: Player):
-        if player.role_own == "UC":  # passing the tracked CH trades for the UC in question
-            if player.CHExDat == '':
-                html = '<td>0</td>'
-                return dict(html=html)
-            else:
-                import json
-                # print(player.ExDat)
-                ExchangeData = json.loads(player.CHExDat)
-                # print(ExchangeData)
-                ExDat = []
-                for ID in ExchangeData:
-                    ExchangeData[ID].insert(0,ID)
-                    ExDat.append(ExchangeData[ID])
-                # print(ExDat)
-                html = '<td>'
-                for item in ExDat:
-                    html += 'To CH<sub>' + item[0] + '</sub> sold ' + str(item[1]) + ' item for ' + str(item[2]) + '<br>'
-                html += '</td>'
-                # print(html)
-                return dict(html=html)                            
-        if player.role_own == "CH":  # passing the tracked UC trades for the CH in question
-            if player.UCExDat == '':
-                html = '<td>0</td>'
-                return dict(html=html)
-            else:
-                import json
-                # print(player.ExDat)
-                ExchangeData = json.loads(player.UCExDat)
-                # print(ExchangeData)
-                ExDat = []
-                for ID in ExchangeData:
-                    ExchangeData[ID].insert(0,ID)
-                    ExDat.append(ExchangeData[ID])
-                # print(ExDat)
-                html = '<td>'
-                for item in ExDat:
-                    html += 'From UC<sub>' + item[0] + '</sub> bought ' + str(item[1]) + ' item for ' + str(item[2]) + '<br>'
-                html += '</td>'
-                # print(html)
-                return dict(html=html)
+    @staticmethod
+    def js_vars(player: Player):
+        import json
+        ExDat = json.loads(player.group.ExDat)
+        if str(player.id_in_group) + "_ID" in ExDat:
+            ids = ExDat[str(player.id_in_group) + "_ID"]
+            items = ExDat[str(player.id_in_group) + "_items"]
+            prices = ExDat[str(player.id_in_group) + "_price"]
+        else:
+            ids = []
+            items = []
+            prices = []
+        return dict(ids=ids, items_count=items, prices=prices)
+
+    # def vars_for_template(player: Player):
+    #     if player.role_own == "UC":  # passing the tracked CH trades for the UC in question
+    #         if player.CHExDat == '':
+    #             html = '<td>0</td>'
+    #             return dict(html=html)
+    #         else:
+    #             import json
+    #             # print(player.ExDat)
+    #             ExchangeData = json.loads(player.CHExDat)
+    #             # print(ExchangeData)
+    #             ExDat = []
+    #             for ID in ExchangeData:
+    #                 ExchangeData[ID].insert(0,ID)
+    #                 ExDat.append(ExchangeData[ID])
+    #             # print(ExDat)
+    #             html = '<td>'
+    #             for item in ExDat:
+    #                 html += 'To CH<sub>' + item[0] + '</sub> sold ' + str(item[1]) + ' item for ' + str(item[2]) + '<br>'
+    #             html += '</td>'
+    #             # print(html)
+    #             return dict(html=html)
+    #     if player.role_own == "CH":  # passing the tracked UC trades for the CH in question
+    #         if player.UCExDat == '':
+    #             html = '<td>0</td>'
+    #             return dict(html=html)
+    #         else:
+    #             import json
+    #             # print(player.ExDat)
+    #             ExchangeData = json.loads(player.UCExDat)
+    #             # print(ExchangeData)
+    #             ExDat = []
+    #             for ID in ExchangeData:
+    #                 ExchangeData[ID].insert(0,ID)
+    #                 ExDat.append(ExchangeData[ID])
+    #             # print(ExDat)
+    #             html = '<td>'
+    #             for item in ExDat:
+    #                 html += 'From UC<sub>' + item[0] + '</sub> bought ' + str(item[1]) + ' item for ' + str(item[2]) + '<br>'
+    #             html += '</td>'
+    #             # print(html)
+    #             return dict(html=html)
 
 
 def creating_session(subsession):
     Initialization(subsession, Constants)
 
 
-def set_payoffs(subsession):
-    UCPayoffnRest(subsession, Constants)
+def set_payoffs(group):
+    Transactions(group, Constants)
 
 
 page_sequence = [Days, ResultsWaitPage, Results]

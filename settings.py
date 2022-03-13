@@ -44,7 +44,7 @@ from os import environ
 SESSION_CONFIGS = [
     dict(
         name='wst_mngm_demo',
-        num_demo_participants=4,
+        num_demo_participants=5,
         use_browser_bots=False,
         app_sequence=['wst_mngm_demo']
     ),
