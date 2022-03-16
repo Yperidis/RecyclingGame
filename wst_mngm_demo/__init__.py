@@ -20,8 +20,6 @@ class Constants(BaseConstants):
     pUCmin = cu(5) # min(ItemDep.values())  # minimum price at which UC is willing to sell
     pExt = cu(8)  # external goods' price
     CHgain = cu(2)  # static markup for the CH (commission)
-    # pCHmax = max(ItemDep.values())  # maximum price at which CH is willing to buy
-    # ClP = (pUCmin + pCHmax)/2  # a tentative static clearing price
 
 
 class Subsession(BaseSubsession):
@@ -42,8 +40,8 @@ class Player(BasePlayer):
     actionBRE = models.IntegerField(min=0, max=Constants.RECmax, initial=0, label="How many items are you willing to buy?")
     actionPP = models.IntegerField(min=0, label="How many items are you willing to push to the platform?")
     priceUC = models.CurrencyField(min=cu(0), initial=cu(5), label="Name the price you want to sell for.")
-    priceCH = models.CurrencyField(min=0, initial=cu(5), label="Name the price you are willing to buy for.")
-    priceRE = models.CurrencyField(min=0, label="Name the price you are willing to sell for.")
+    priceCH = models.CurrencyField(min=cu(0), initial=cu(5), label="Name the price you are willing to buy for.")
+    priceRE = models.CurrencyField(min=cu(0), label="Name the price you are willing to sell for.")
     actionD = models.IntegerField(min=0, initial=0, label="How many items are you willing to dispose through standard means?")
     # actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
     actionRESell = models.IntegerField(min=0, initial=0, max=Constants.CHCmax, label="How many items are you willing to sell to an RE?")
