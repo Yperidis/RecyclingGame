@@ -16,6 +16,7 @@
 {{ if player.role_own == 'CH' and player.bought > 0 }}
     The clearing price is {{ player.ClPr }}. <br>
 {{ endif }}
+{{ endcomment }}
 
 {{ if player.role_own == 'UC' and player.actionD > 0 or player.UCOpenSupply > 0 }}
     The default operator's tariff is {{ Constants.OpTariff }}. <br> <br>
@@ -24,7 +25,7 @@
 {{ if player.role_own == 'CH' and player.actionD > 0 }}
     The default operator's tariff is {{ Constants.OpTariff }}. <br> <br>
 {{ endif }}
-{{ endcomment }}
+
 
 {{ if player.role_own == 'UC' or player.role_own == 'CH' }}
 

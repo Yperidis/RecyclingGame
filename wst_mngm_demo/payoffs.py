@@ -28,7 +28,6 @@ def Transactions(group, Constants):
                         CHplayer[0].CHOpenDemand -= UCplayer[0].UCOpenSupply  # track the remaining supply of the CH in question
                         CHplayer[0].bought += UCplayer[0].UCOpenSupply  # items bought
                         UCplayer[0].payoff += UCplayer[0].UCOpenSupply * ClPr  # pay per the UC PP quantity
-                        # UCplayer[0].participant.balance += UCplayer[0].payoff  # track the UC balance
                         CHplayer[0].payoff -= UCplayer[0].UCOpenSupply * ClPr
                         CHplayer[0].participant.capac -= UCplayer[0].UCOpenSupply  # CH recursive capacity relation
                         CHplayer[0].participant.store += UCplayer[0].UCOpenSupply  # CH recursive storage relation
@@ -82,25 +81,20 @@ def Transactions(group, Constants):
                     # UCplayer[0].CHExDat = json.dumps( CHtemp )  # parse for passing CH exchanges to the template
                     CHplayer[0].participant.store = Constants.CHCmax - CHplayer[0].participant.capac # calculate current CH storage
                     if UCplayer[0].UCOpenSupply == 0:  # if the offer of the UC in question has been spent proceed to the next UC (case of PP=0 accounted for)
-                        # CHtemp = {}
                         break
                 else:  # if the CH in question has met their demand proceed to the next CH
-                    # UCtemp = {}  # reset ledger for UC transactions
                     continue
             else:  # no trade takes place for the given pair. Proceed to the next CH.
                 continue
-            # if CHplayer[0].CHOpenDemand == 0:
-            #     UCtemp = {}  # in case that the open demand of the CH in question has been met the next CH tracks the next UCs and therefore we reset the ledger for UC transactions
         UCplayer[0].sold = UCplayer[0].actionPP - UCplayer[0].UCOpenSupply  # items sold
         UCplayer[0].participant.balance += UCplayer[0].payoff  # track the UC balance
-        # CHtemp = {}
         if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             DefaultOperatorCosts(UCplayer[0], Constants.OpTariff)
     for CHplayer in CHWTsort:
         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
         if CHplayer[0].actionD > 0:  # calculate the costs of a potential standard disposal by choice for the CH
             DefaultOperatorCosts(CHplayer[0], Constants.OpTariff)
-    print(ExDat)
+    # print(ExDat)
     group.ExDat = json.dumps(ExDat)
 
 
