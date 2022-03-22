@@ -3,13 +3,13 @@ def Initialization(subsession, Constants):
     subsession.set_group_matrix(new_structure)
     players = subsession.get_players()
     subsession.group_randomly(fixed_id_in_group=True)  # for grouping players randomly upon initialisation but keeping roles constant throughout the rounds    
-    roles = ['UC', 'CH', 'RE']  # assuming three roles, the loop below will always distribute the roles cyclically up to the number of players in the group
-    num_UCCH = len(roles) - 1
+    roles = ['UC', 'CH']  # assuming two roles, the loop below will always distribute the roles cyclically up to the number of players in the group
+    num_UCCH = len(roles)
 
     for player in players:
-        if player.id_in_group == 1:
-            player.role_own = roles[2]  # RE assignment
-        elif player.id_in_group % num_UCCH == 0:
+        # if player.id_in_group == 1:
+        #     player.role_own = roles[2]  # RE assignment
+        if player.id_in_group % num_UCCH == 0:
             player.role_own = roles[0]  # UC assignment
         else:
             player.role_own = roles[1]  # CH assignment
@@ -20,7 +20,4 @@ def Initialization(subsession, Constants):
             elif player.role_own == 'CH':
                 player.participant.capac = Constants.CHCmax
                 player.participant.balance = Constants.InitCHBalance  # initialize balance for CH
-            else:
-                player.participant.capac = Constants.RECmax
-                player.participant.balance = Constants.InitREBalance
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
