@@ -18,6 +18,14 @@
 {{ endif }}
 {{ endcomment }}
 
+{{ if player.role_own == 'UC' and player.actionSUC == 0 and player.actionPP == 0 and player.priceUC == Constants.pUCInit and player.actionD == 0 }}
+    The inactivity penalty is {{ Constants.Penalty }}. <br> <br>
+{{ endif }}
+
+{{ if player.role_own == 'CH' and player.actionBCH == 0 and player.actionRESell == 0 and player.priceCH == Constants.pCHInit }}
+    The inactivity penalty is {{ Constants.Penalty }}. <br> <br>
+{{ endif }}
+
 {{ if player.role_own == 'UC' and player.actionD > 0 or player.UCOpenSupply > 0 }}
     The default operator's tariff is {{ Constants.OpTariff }}. <br> <br>
 {{ endif }}

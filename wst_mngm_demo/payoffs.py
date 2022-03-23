@@ -18,6 +18,12 @@ def Transactions(group, Constants):
     # UCBalance = 
 
     for UCplayer in UCWTsort:  # "first come" UC order
+        print(Constants.pUCInit)
+        print(UCplayer[0].actionSUC, UCplayer[0].actionPP, UCplayer[0].priceUC, Constants.pUCInit, UCplayer[0].actionD)
+        if UCplayer[0].actionSUC == 0 and UCplayer[0].actionPP == 0 and UCplayer[0].priceUC == Constants.pUCInit and UCplayer[0].actionD == 0:  # monetary penalty for UC timeout
+            UCplayer[0].payoff = -Constants.Penalty
+            UCplayer[0].participant.balance += UCplayer[0].payoff
+            continue
         UCplayer[0].participant.capac = Constants.UCCmax - UCplayer[0].actionSUC  # UC recursive capacity relation
         UCplayer[0].participant.store = UCplayer[0].actionSUC  # calculate current UC storage
         for CHplayer in CHWTsort:  # "first come" CH order
@@ -91,6 +97,10 @@ def Transactions(group, Constants):
         if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             DefaultOperatorCosts(UCplayer[0], Constants.OpTariff)
     for CHplayer in CHWTsort:
+        if CHplayer[0].actionBCH == 0 and CHplayer[0].actionRESell == 0 and CHplayer[0].priceCH == Constants.pCHInit:  # monetary penalty for CH timeout
+                    CHplayer[0].payoff = -Constants.Penalty
+                    CHplayer[0].participant.balance += CHplayer[0].payoff
+                    continue        
         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
         if CHplayer[0].actionD > 0:  # calculate the costs of a potential standard disposal by choice for the CH
             DefaultOperatorCosts(CHplayer[0], Constants.OpTariff)

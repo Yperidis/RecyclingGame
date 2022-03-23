@@ -17,9 +17,11 @@ class Constants(BaseConstants):
     UCCmax, CHCmax = 6, 50  # maximum item storage capacity for UC and CH. In this rough form not taking size or weight into account UCCmax>=g.
     OpTariff = cu(25)  # fee for operator waste handling
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
-    pUCmin = cu(5) # min(ItemDep.values())  # minimum price at which UC is willing to sell
+    pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
     pExt = cu(8)  # external goods' price
     CHgain = cu(2)  # static markup for the CH (commission)
+    GlobalTimeout = 3  # Timeout for pages
+    Penalty = cu(35)  # Inactivity penalty (irresponsible disposal, hygiene hazard, etc.)
 
 
 class Subsession(BaseSubsession):
@@ -39,12 +41,11 @@ class Player(BasePlayer):
     actionSUC = models.IntegerField(min=0, max=Constants.UCCmax, initial=0, label="How many items are you willing to store?")
     actionBCH = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to buy?")
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to sell?")
-    actionPP = models.IntegerField(min=0, label="How many items are you willing to push to the platform?")
-    priceUC = models.CurrencyField(min=cu(0), initial=cu(5), label="Name the price you want to sell for.")
-    priceCH = models.CurrencyField(min=cu(0), initial=cu(5), label="Name the price you are willing to buy for.")
+    actionPP = models.IntegerField(min=0, initial=0, label="How many items are you willing to push to the platform?")
+    priceUC = models.CurrencyField(min=cu(0), initial=Constants.pUCInit, label="Name the price you want to sell for.")
+    priceCH = models.CurrencyField(min=cu(0), initial=Constants.pCHInit, label="Name the price you are willing to buy for.")
     actionD = models.IntegerField(min=0, initial=0, label="How many items are you willing to dispose through standard means?")
     # actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
-    actionRESell = models.IntegerField(min=0, initial=0, max=Constants.CHCmax, label="How many items are you willing to sell to an RE?")
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
     # Fields not set by participant for payoff calculation
@@ -57,6 +58,7 @@ class Player(BasePlayer):
 
 # PAGES
 class Days(Page):
+    timeout_seconds = Constants.GlobalTimeout
     form_model = 'player'
     # form_fields = ['actionSUC', 'actionPP', 'actionD', 'WstType']  # the action set
 
@@ -121,6 +123,9 @@ class ResultsWaitPage(WaitPage):
 
 
 class Results(Page):
+    timeout_seconds = Constants.GlobalTimeout
+
+
     @staticmethod
     def js_vars(player: Player):
         import json
