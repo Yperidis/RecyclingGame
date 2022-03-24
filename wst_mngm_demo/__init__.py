@@ -42,7 +42,7 @@ class Player(BasePlayer):
     actionBCH = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to buy?")
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to sell?")
     actionPP = models.IntegerField(min=0, initial=0, label="How many items are you willing to push to the platform?")
-    priceUC = models.CurrencyField(min=cu(0), initial=Constants.pUCInit, label="Name the price you want to sell for.")
+    priceUC = models.CurrencyField(min=cu(0), initial=Constants.pUCInit, label="Name the price you are willing to sell for.")
     priceCH = models.CurrencyField(min=cu(0), initial=Constants.pCHInit, label="Name the price you are willing to buy for.")
     actionD = models.IntegerField(min=0, initial=0, label="How many items are you willing to dispose through standard means?")
     # actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
@@ -58,8 +58,8 @@ class Player(BasePlayer):
 
 # PAGES
 class Days(Page):
-    timeout_seconds = Constants.GlobalTimeout
     form_model = 'player'
+    timeout_seconds = Constants.GlobalTimeout
     # form_fields = ['actionSUC', 'actionPP', 'actionD', 'WstType']  # the action set
 
     @staticmethod

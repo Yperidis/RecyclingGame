@@ -21,3 +21,4 @@ def Initialization(subsession, Constants):
                 player.participant.capac = Constants.CHCmax
                 player.participant.balance = Constants.InitCHBalance  # initialize balance for CH
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
+            
