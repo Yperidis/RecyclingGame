@@ -18,7 +18,7 @@ def Transactions(group, Constants):
     # UCBalance = 
 
     for UCplayer in UCWTsort:  # "first come" UC order
-        if UCplayer[0].actionSUC == 0 and UCplayer[0].actionPP == 0 and UCplayer[0].priceUC == Constants.pUCInit and UCplayer[0].actionD == 0:  # monetary penalty for UC timeout
+        if UCplayer[0].TimeOut:  # monetary penalty for UC timeout
             UCplayer[0].payoff = -Constants.Penalty
             UCplayer[0].participant.balance += UCplayer[0].payoff
             continue
@@ -52,14 +52,11 @@ def Transactions(group, Constants):
                             ExDat[str(CHplayer[0].id_in_group) + "_items"] = [UCplayer[0].UCOpenSupply]
                             ExDat[str(CHplayer[0].id_in_group) + "_price"] = [float(ClPr)]
                         UCplayer[0].UCOpenSupply = 0  # same for UC
-                        # UCtemp.update( { UCplayer[0].id_in_group : (UCplayer[0].actionPP, str( UCplayer[0].payoff) ) } )
-                        # CHtemp.update( { CHplayer[0].id_in_group : (UCplayer[0].actionPP, str( UCplayer[0].payoff) ) } )
                     else:  # partial fulfillment of UC offer from available demand (CH)
                         CHplayer[0].bought += CHplayer[0].CHOpenDemand  # items bought
                         UCplayer[0].UCOpenSupply -= CHplayer[0].CHOpenDemand  # same for the UC
                         UCplayer[0].payoff += CHplayer[0].CHOpenDemand * ClPr  # pay per the CH stored quantity
                         CHplayer[0].payoff -= CHplayer[0].CHOpenDemand * ClPr
-                        # CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
                         CHplayer[0].participant.capac -= CHplayer[0].CHOpenDemand  # CH recursive capacity relation
                         CHplayer[0].participant.store += CHplayer[0].CHOpenDemand  # CH recursive storage relation
                         if str(UCplayer[0].id_in_group) + "_ID" in ExDat:
@@ -79,10 +76,6 @@ def Transactions(group, Constants):
                             ExDat[str(CHplayer[0].id_in_group) + "_items"] = [CHplayer[0].CHOpenDemand]
                             ExDat[str(CHplayer[0].id_in_group) + "_price"] = [float(ClPr)]
                         CHplayer[0].CHOpenDemand = 0  # track the remaining demand of the CH in question
-                        # UCtemp.update( { UCplayer[0].id_in_group : (CHplayer[0].bought, str( UCplayer[0].payoff) ) } )
-                        # CHtemp.update( { CHplayer[0].id_in_group : (CHplayer[0].bought, str( UCplayer[0].payoff) ) } )
-                    # CHplayer[0].UCExDat = json.dumps( UCtemp )  # parse for passing UC exchanges to the template
-                    # UCplayer[0].CHExDat = json.dumps( CHtemp )  # parse for passing CH exchanges to the template
                     CHplayer[0].participant.store = Constants.CHCmax - CHplayer[0].participant.capac # calculate current CH storage
                     if UCplayer[0].UCOpenSupply == 0:  # if the offer of the UC in question has been spent proceed to the next UC (case of PP=0 accounted for)
                         break
@@ -92,7 +85,7 @@ def Transactions(group, Constants):
                 continue
         UCplayer[0].sold = UCplayer[0].actionPP - UCplayer[0].UCOpenSupply  # items sold
         UCplayer[0].participant.balance += UCplayer[0].payoff  # track the UC balance
-        if UCplayer[0].UCOpenSupply > 0 and UCplayer[0].participant.capac > 0:  # unmathced demand channeled to storage up to saturation  # TEST!!!
+        if UCplayer[0].UCOpenSupply > 0 and UCplayer[0].participant.capac > 0:  # unmathced demand channeled to storage up to saturation
             if UCplayer[0].UCOpenSupply <= UCplayer[0].participant.capac:  # unmatched demand smaller than current capacity (updates)
                 UCplayer[0].participant.capac -= UCplayer[0].UCOpenSupply
                 UCplayer[0].participant.store += UCplayer[0].UCOpenSupply
@@ -104,31 +97,16 @@ def Transactions(group, Constants):
         if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             DefaultOperatorCosts(UCplayer[0], Constants.OpTariff)
     for CHplayer in CHWTsort:
-        # print(CHplayer[0].actionBCH, CHplayer[0].actionRESell, CHplayer[0].priceCH, Constants.pCHInit)
-        if CHplayer[0].actionBCH == 0 and CHplayer[0].actionRESell == 0 and CHplayer[0].priceCH == Constants.pCHInit:  # monetary penalty for CH timeout
+        if CHplayer[0].TimeOut:  # monetary penalty for CH timeout (cost of opportunity and operations)
                     CHplayer[0].payoff = -Constants.Penalty
                     CHplayer[0].participant.balance += CHplayer[0].payoff
                     continue        
         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
-        if CHplayer[0].actionD > 0:  # calculate the costs of a potential standard disposal by choice for the CH
-            DefaultOperatorCosts(CHplayer[0], Constants.OpTariff)
     # print(ExDat)
     group.ExDat = json.dumps(ExDat)
 
 
-# def CHPayoffnRest():
-#     wpatCH = { player : player.wait_page_arrival for player in players if player.role_own == 'CH' }  # dictionary of player ID-wait page arrival time
-#     wpatRE = { player : player.wait_page_arrival for player in players if player.role_own == 'RE' }
-#     CHWTsort, REWTsort = sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] ), sorted( zip( wpatRE.keys(), wpatRE.values()), key=lambda pair : pair[1] )  # sort CH and RE IDs following their waiting time ascending
-
-
 def DefaultOperatorCosts(player, ConstantsOpTariff):
-    if player.role_own == 'CH':
-        player.payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the CH payoff
-        player.participant.balance -= ConstantsOpTariff  # update the CH balance
-        player.participant.capac += player.actionD  # update the CH capacity and storage
-        player.participant.store -= player.actionD
-
     if player.role_own == 'UC':
         player.payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the UC payoff
         player.participant.balance -= ConstantsOpTariff  # update the UC balance

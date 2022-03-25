@@ -8,30 +8,17 @@
     End of day {{ player.round_number }} as {{ player.role_own }} role.
 </h2>
 
-{{ comment }}
-{{ if player.role_own == 'UC' and player.sold > 0 }}
-    The clearing price is {{ player.ClPr }}. <br>
-{{ endif }}
 
-{{ if player.role_own == 'CH' and player.bought > 0 }}
-    The clearing price is {{ player.ClPr }}. <br>
-{{ endif }}
-{{ endcomment }}
-
-{{ if player.role_own == 'UC' and player.actionSUC == 0 and player.actionPP == 0 and player.priceUC == Constants.pUCInit and player.actionD == 0 }}
-    The inactivity penalty is {{ Constants.Penalty }}. <br> <br>
-{{ endif }}
-
-{{ if player.role_own == 'CH' and player.actionBCH == 0 and player.actionRESell == 0 and player.priceCH == Constants.pCHInit }}
-    The inactivity penalty is {{ Constants.Penalty }}. <br> <br>
+{{ if player.TimeOut == True }}
+    The inactivity penalty is {{ Constants.Penalty }}. <br>
 {{ endif }}
 
 {{ if player.role_own == 'UC' and player.actionD > 0 or player.UCOpenSupply > 0 }}
-    The default operator's tariff is {{ Constants.OpTariff }}. <br> <br>
+    The default operator's tariff is {{ Constants.OpTariff }}. <br>
 {{ endif }}
 
 {{ if player.role_own == 'CH' and player.actionD > 0 }}
-    The default operator's tariff is {{ Constants.OpTariff }}. <br> <br>
+    The default operator's tariff is {{ Constants.OpTariff }}. <br>
 {{ endif }}
 
 
@@ -45,29 +32,29 @@
                 <th scope="col">Pushed to platform</th>
                 <th scope="col">Sold on platform</th>
                 <th scope="col">Not sold to any CH</th>
+                <th scope="col">Disposed through standard means</th>
             {{ endif }}
             {{ if player.role_own == 'CH' }}
                 <th scope="col">Bought from UC</th>
                 <th scope="col">Sold to RE</th>
                 <th scope="col">Stored</th>
             {{ endif }}
-            <th scope="col">Disposed through standard means</th>
             <th scope="col">Payoff</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             {{ if player.role_own == 'UC' }}
-                <td>{{ player.actionSUC }}</td>
+                <td>{{ player.participant.store }}</td>
                 <td>{{ player.actionPP }}</td>
                 <td>{{ player.sold }}</td>
                 <td>{{ player.UCOpenSupply }}</td>
+                <td>{{ player.actionD }}</td>                
             {{ else }}
                 <td>{{ player.bought }}</td>
                 <td>{{ player.sold }}</td>
                 <td>TODO</td>
             {{ endif }}
-            <td>{{ player.actionD }}</td>
             <td>{{ player.payoff }}</td>
         </tr>
     </tbody>

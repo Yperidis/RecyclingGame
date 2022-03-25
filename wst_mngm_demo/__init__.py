@@ -20,7 +20,7 @@ class Constants(BaseConstants):
     pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
     pExt = cu(8)  # external goods' price
     CHgain = cu(2)  # static markup for the CH (commission)
-    GlobalTimeout = 3  # Timeout for pages
+    GlobalTimeout = 5  # Timeout for pages
     Penalty = cu(35)  # Inactivity penalty (irresponsible disposal, hygiene hazard, etc.)
 
 
@@ -45,6 +45,7 @@ class Player(BasePlayer):
     priceUC = models.CurrencyField(min=cu(0), initial=Constants.pUCInit, label="Name the price you are willing to sell for.")
     priceCH = models.CurrencyField(min=cu(0), initial=Constants.pCHInit, label="Name the price you are willing to buy for.")
     actionD = models.IntegerField(min=0, initial=0, label="How many items are you willing to dispose through standard means?")
+    TimeOut = models.BooleanField(initial=False)  # a timeout signaling variable
     # actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
@@ -112,6 +113,9 @@ class Days(Page):
             player.UCOpenSupply = player.actionPP  # flags for keeping track of what was actually sold and bought to be displayed at the results
         elif player.role_own == 'CH':
             player.CHOpenDemand = player.actionBCH
+
+        if timeout_happened:
+            player.TimeOut = True
 
         import time
 
