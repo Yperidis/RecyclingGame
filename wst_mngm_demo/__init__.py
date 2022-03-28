@@ -46,7 +46,6 @@ class Player(BasePlayer):
     priceCH = models.CurrencyField(min=cu(0), initial=Constants.pCHInit, label="Name the price you are willing to buy for.")
     actionD = models.IntegerField(min=0, initial=0, label="How many items are you willing to dispose through standard means?")
     TimeOut = models.BooleanField(initial=False)  # a timeout signaling variable
-    # actionFwd = models.IntegerField(min=0, max=Constants.CHCmax, label="How many items are you willing to forward to another CH?")
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
     # Fields not set by participant for payoff calculation
@@ -58,19 +57,15 @@ class Player(BasePlayer):
 
 
 # PAGES
-class Days(Page):
+class UniversalDays(Page):
     form_model = 'player'
     timeout_seconds = Constants.GlobalTimeout
     # form_fields = ['actionSUC', 'actionPP', 'actionD', 'WstType']  # the action set
 
     @staticmethod
     def vars_for_template(player: Player):
-        # if player.role_own == "RE":
-        #     items_to_handle = 0
         if player.role_own == "UC":
             items_to_handle = player.participant.store + Constants.g
-        else:
-            items_to_handle = player.participant.store
         return dict(items_to_handle=items_to_handle)
 
 
@@ -79,7 +74,7 @@ class Days(Page):
         if player.role_own == 'UC':
             return ['actionSUC', 'actionPP', 'priceUC', 'actionD']            
         elif player.role_own == 'CH':
-            return ['actionBCH', 'actionRESell', 'priceCH']
+            return ['actionBCH', 'priceCH']
 
 
     @staticmethod
@@ -93,15 +88,11 @@ class Days(Page):
                 return "The price you are asking per item exceeds that of the item's deposit in the circular economy by " + str(amount) + ". Try a lower one."
         elif player.role_own == 'CH':
             amount = actions['priceCH'] + Constants.CHgain - Constants.pExt
-            LHS1 = actions['actionBCH']
-            LHS2 = actions['actionRESell']
-            RHS1 = player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
-            RHS2 = player.participant.store
-            if LHS1 - LHS2 > RHS1:
+            LHS = actions['actionBCH']
+            RHS = player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
+            if LHS > RHS:
                 return 'You cannot buy more than you can store.'
-            if RHS2 < LHS2: 
-                return 'You cannot sell or dispose more than you have in store.'
-            if player.participant.balance - LHS1 * actions['priceCH'] <= 0:
+            if player.participant.balance - LHS * actions['priceCH'] <= 0:
                 return 'You cannot afford to buy this quantity.'  # TODO consider debt incurrence here
             if amount > 0:
                 return "The price you are willing to pay per item exceeds that of the item's deposit in the circular economy by " + str(amount) + ". Try a lower one."
@@ -120,6 +111,37 @@ class Days(Page):
         import time
 
         player.wait_page_arrival = time.time()  # recording the players' arrival times at the wait pages
+
+
+class CHSellDays(Page):
+    form_model = 'player'
+    timeout_seconds = Constants.GlobalTimeout
+
+    @staticmethod
+    def is_displayed(player):
+        return player.role_own == 'CH'
+
+
+    @staticmethod
+    def get_form_fields(player):
+        if player.role_own == 'CH':
+            return ['actionRESell']
+
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        if player.role_own == "CH":
+            items_to_handle = player.participant.store
+        return dict(items_to_handle=items_to_handle)
+
+
+    @staticmethod
+    def error_message(player, actions):
+        if player.role_own == 'CH':
+            LHS = actions['actionRESell']
+            RHS = player.participant.store
+            if RHS < LHS: 
+                return 'You cannot sell more than you have in store.'
 
 
 class ResultsWaitPage(WaitPage):
@@ -153,4 +175,4 @@ def set_payoffs(group):
     Transactions(group, Constants)
 
 
-page_sequence = [Days, ResultsWaitPage, Results]
+page_sequence = [UniversalDays, CHSellDays, ResultsWaitPage, Results]

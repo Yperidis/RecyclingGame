@@ -1,0 +1,63 @@
+{{ block title }} 
+    Recycpoly 
+{{ endblock }} 
+{{ block content }} 
+
+<h2>
+    Day {{ player.round_number }} as {{ player.role_own }} role. Selling session.
+</h2>
+
+<br>
+<table class="table overview-table">
+    <thead>
+      <tr>
+        <th scope="col">Balance</th>
+        <th scope="col">Capacity (C<sub>max</sub> = {{ if player.role_own == 'UC' }}{{ Constants.UCCmax }}{{ else }}{{ Constants.CHCmax }}{{ endif }})</th>
+        <th scope="col">Items in store</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ player.participant.balance }}</td>
+        <td>{{ player.participant.capac }}</td>
+        <td>{{ player.participant.store }}</td>
+      </tr>
+    </tbody>
+  </table>
+<br>
+
+
+{{ if player.role_own == 'CH' }}
+<img src="{{ static 'wst_mngm_demo/CH.png' }}"/>
+{{ endif }}
+
+{{ formfields }}
+
+{{ next_button }} 
+
+{{ endblock }}
+
+{{ block styles }}
+<style>
+    .overview-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    .overview-table td, .overview-table th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .overview-table tr:nth-child(odd){
+        background-color: #f2f2f2;
+    }
+
+    .overview-table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #5C933F;
+        color: white;
+    }
+</style>
+{{ endblock }}
