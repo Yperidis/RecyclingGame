@@ -91,9 +91,9 @@ def Transactions(group, Constants):
                 UCplayer[0].participant.store += UCplayer[0].UCOpenSupply
                 UCplayer[0].UCOpenSupply = 0
             else:  # unmatched demand greater than current capacity (updates). Leads to operator cost at the next conditional.
-                UCplayer[0].participant.capac = 0
                 UCplayer[0].participant.store = Constants.UCCmax
                 UCplayer[0].UCOpenSupply -= UCplayer[0].participant.capac
+                UCplayer[0].participant.capac = 0
         if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             DefaultOperatorCosts(UCplayer[0], Constants.OpTariff)
     for CHplayer in CHWTsort:

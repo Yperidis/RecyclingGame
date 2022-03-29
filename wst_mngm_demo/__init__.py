@@ -20,7 +20,7 @@ class Constants(BaseConstants):
     pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
     pExt = cu(8)  # external goods' price
     CHgain = cu(2)  # static markup for the CH (commission)
-    GlobalTimeout = 5  # Timeout for pages
+    GlobalTimeout = 195  # Timeout for pages
     Penalty = cu(35)  # Inactivity penalty (irresponsible disposal, hygiene hazard, etc.)
 
 
@@ -66,7 +66,7 @@ class UniversalDays(Page):
     def vars_for_template(player: Player):
         if player.role_own == "UC":
             items_to_handle = player.participant.store + Constants.g
-        return dict(items_to_handle=items_to_handle)
+            return dict(items_to_handle=items_to_handle)
 
 
     @staticmethod
