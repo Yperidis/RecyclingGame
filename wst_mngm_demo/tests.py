@@ -13,7 +13,7 @@ class PlayerBot(Bot):
         #     yield Days
         #     yield Results
 
-        #### Four player game
+        #### Four player game (2 UCs and 2 CHs)
         #### Round 1. Trade with 1 UC selling to 1 CH and 1 UC selling to 2 CH. Both cases of UCplayer[0].UCOpenSupply <= and > CHplayer[0].CHOpenDemand take place. 
         if self.player.role_own == 'CH' and self.player.id_in_group == 1 and RN == 1:
             Bal = self.player.participant.balance  # balance, storage and capacity before actions

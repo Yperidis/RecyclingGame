@@ -15,6 +15,7 @@
         <th scope="col">Balance</th>
         <th scope="col">Capacity (C<sub>max</sub> = {{ if player.role_own == 'UC' }}{{ Constants.UCCmax }}{{ else }}{{ Constants.CHCmax }}{{ endif }})</th>
         {{ if player.role_own == 'UC' }}
+          <th scope="col">Survival costs</th>
           <th scope="col">Generated waste items</th>
         {{ endif }}
         <th scope="col">Items in store</th>
@@ -28,6 +29,7 @@
         <td>{{ player.participant.balance }}</td>
         <td>{{ player.participant.capac }}</td>
         {{ if player.role_own == 'UC' }}
+          <td>{{ SurvivalCosts }}</td>
           <td>{{ Constants.g }}</td>
         {{ endif }}
         <td>{{ player.participant.store }}</td>

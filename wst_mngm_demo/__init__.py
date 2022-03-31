@@ -12,16 +12,17 @@ class Constants(BaseConstants):
     players_per_group = 4
     # UC_role, CH_role = 'UC', 'CH'
     num_rounds = 3
-    InitUCBalance, InitCHBalance = cu(4000), cu(500)  # monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c), assuming they can afford it.
+    pExt = cu(10)  # price per item for external goods
+    pDep = pExt/10  # deposit price per item
     g = 5  # rate of waste (item generation per day-round)
+    Penalty = cu(35)  # Inactivity penalty (irresponsible disposal, hygiene hazard, etc.)
+    InitUCBalance, InitCHBalance = (g * pExt + Penalty) * num_rounds, cu(500)  # monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c) and incurring the inactivity penalty.
     UCCmax, CHCmax = 6, 50  # maximum item storage capacity for UC and CH. In this rough form not taking size or weight into account UCCmax>=g.
     OpTariff = cu(25)  # fee for operator waste handling
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
-    pExt = cu(8)  # external goods' price
     CHgain = cu(2)  # static markup for the CH (commission)
-    GlobalTimeout = 195  # Timeout for pages
-    Penalty = cu(35)  # Inactivity penalty (irresponsible disposal, hygiene hazard, etc.)
+    GlobalTimeout = 5  # Timeout for pages
 
 
 class Subsession(BaseSubsession):
@@ -42,8 +43,8 @@ class Player(BasePlayer):
     actionBCH = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to buy?")
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to sell?")
     actionPP = models.IntegerField(min=0, initial=0, label="How many items are you willing to push to the platform?")
-    priceUC = models.CurrencyField(min=cu(0), initial=Constants.pUCInit, label="Name the price you are willing to sell for.")
-    priceCH = models.CurrencyField(min=cu(0), initial=Constants.pCHInit, label="Name the price you are willing to buy for.")
+    priceUC = models.CurrencyField(min=cu(0), initial=Constants.pUCInit, label="Name the price you are willing to sell items for.")
+    priceCH = models.CurrencyField(min=Constants.pDep, initial=Constants.pCHInit, label="Name the price you are willing to buy items for (at least their deposit " + str(Constants.pDep) + ").")
     actionD = models.IntegerField(min=0, initial=0, label="How many items are you willing to dispose through standard means?")
     TimeOut = models.BooleanField(initial=False)  # a timeout signaling variable
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
@@ -62,11 +63,14 @@ class UniversalDays(Page):
     timeout_seconds = Constants.GlobalTimeout
     # form_fields = ['actionSUC', 'actionPP', 'actionD', 'WstType']  # the action set
 
+
     @staticmethod
     def vars_for_template(player: Player):
-        if player.role_own == "UC":
+        if player.role_own == "UC": 
             items_to_handle = player.participant.store + Constants.g
-            return dict(items_to_handle=items_to_handle)
+            SurvivalCosts = Constants.pExt * Constants.g
+            player.participant.balance -= SurvivalCosts
+            return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
 
 
     @staticmethod
