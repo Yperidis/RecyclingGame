@@ -110,3 +110,19 @@ def DefaultOperatorCosts(player, ConstantsOpTariff):
     if player.role_own == 'UC':
         player.payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the UC payoff
         player.participant.balance -= ConstantsOpTariff  # update the UC balance
+
+
+def RESellings(group,Constants):  # the timeout penalty has already been implemented in the transactions
+    import numpy as np
+    players = group.get_players()
+    wpatCH = { player : player.wait_page_arrival for player in players if player.role_own == 'CH' }  # dictionary of player ID-wait page arrival time
+    CHWTsort = sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] )  # sort CH IDs following their waiting time ascending
+    alpha = np.log(Constants.pCHSellMax/Constants.pDep)/(Constants.CHCmax - Constants.CHQc) # WARNING! This coefficient should be in the following loop in case the involved prices and quantities of CH are not equal for all CH.
+
+    for CHplayer in CHWTsort:  # "first come" CH order
+        if CHplayer.actionRESell > Constants.CHcQ:  # condition for sellings to be profitable for the CH
+            CHplayer.payoff = Constants.pDep + np.exp(alpha * CHplayer.actionRESell)  # exponential profit-quantity relation for constants above the Qc for the CH
+            CHplayer.participant.balance += CHplayer.payoff  # update the CH balance
+        else:
+            CHplayer.payoff = Constants.pDep  # otherwise sell at the market's item deposit price
+            CHplayer.participant.balance += CHplayer.payoff

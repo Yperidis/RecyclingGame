@@ -17,11 +17,14 @@ class Constants(BaseConstants):
     g = 5  # rate of waste (item generation per day-round)
     Penalty = cu(35)  # Inactivity penalty (irresponsible disposal, hygiene hazard, etc.)
     InitUCBalance, InitCHBalance = (g * pExt + Penalty) * num_rounds, cu(500)  # monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c) and incurring the inactivity penalty.
-    UCCmax, CHCmax = 6, 50  # maximum item storage capacity for UC and CH. In this rough form not taking size or weight into account UCCmax>=g.
+    UCCmax = 6  # maximum item storage capacity for UC. In this rough form not taking size or weight into account UCCmax>=g.
+    CHCmax = 4*UCCmax  # maximum item storage capacity for CH (4x that of UC to meet the difference in UC and CH role allocation (4:1) in the game)
     OpTariff = cu(25)  # fee for operator waste handling
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
-    CHgain = cu(2)  # static markup for the CH (commission)
+    CHQc = UCCmax  # Critical quantity for CH (above which selling to an RE becomes profitable in respect to the item deposit)
+    pCHSellMax = UCCmax * pDep  # Upper bound for profit of CH
+    pCirMin = pDep/5  # Lower bound of price at which the waste material can be reintroduced in the circular economy
     GlobalTimeout = 5  # Timeout for pages
 
 
@@ -84,7 +87,6 @@ class UniversalDays(Page):
     @staticmethod
     def error_message(player, actions):
         if player.role_own == 'UC':
-            amount = actions['priceUC'] + Constants.CHgain - Constants.pExt
             LHS, RHS = actions['actionSUC'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.UCCmax - player.participant.capac
             if LHS != RHS:
                 return 'The sum of the items in store, pushed to platform and otherwise disposed must equal the generated waste items plus the current storage for all rounds.'
@@ -98,8 +100,6 @@ class UniversalDays(Page):
                 return 'You cannot buy more than you can store.'
             if player.participant.balance - LHS * actions['priceCH'] <= 0:
                 return 'You cannot afford to buy this quantity.'  # TODO consider debt incurrence here
-            if amount > 0:
-                return "The price you are willing to pay per item exceeds that of the item's deposit in the circular economy by " + str(amount) + ". Try a lower one."
 
 
     @staticmethod
@@ -144,7 +144,7 @@ class CHSellDays(Page):
         if player.role_own == 'CH':
             LHS = actions['actionRESell']
             RHS = player.participant.store
-            if RHS < LHS: 
+            if LHS > RHS: 
                 return 'You cannot sell more than you have in store.'
 
 
