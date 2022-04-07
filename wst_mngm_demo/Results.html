@@ -9,8 +9,12 @@
 </h2>
 
 
-{{ if player.TimeOut == True }}
-    The inactivity penalty is {{ Constants.Penalty }}. <br>
+{{ if player.UDTimeOut == True }}
+    The inactivity penalty for UC-CH transactions is {{ Constants.UDPenalty }}. <br>
+{{ endif }}
+
+{{ if player.CHSDTimeOut == True and player.role_own == 'CH' }}
+    The inactivity penalty for selling to REs is {{ Constants.CHSDPenalty }}. <br>
 {{ endif }}
 
 {{ if player.role_own == 'UC' and player.actionD > 0 or player.UCOpenSupply > 0 }}

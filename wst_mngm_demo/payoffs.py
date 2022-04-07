@@ -18,8 +18,8 @@ def Transactions(group, Constants):
     # UCBalance = 
 
     for UCplayer in UCWTsort:  # "first come" UC order
-        if UCplayer[0].TimeOut:  # monetary penalty for UC timeout
-            UCplayer[0].payoff = -Constants.Penalty
+        if UCplayer[0].UDTimeOut:  # monetary penalty for UC timeout
+            UCplayer[0].payoff -= Constants.UDPenalty
             UCplayer[0].participant.balance += UCplayer[0].payoff
             continue
         UCplayer[0].participant.capac = Constants.UCCmax - UCplayer[0].actionSUC  # UC recursive capacity relation
@@ -96,11 +96,12 @@ def Transactions(group, Constants):
                 UCplayer[0].participant.capac = 0
         if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             DefaultOperatorCosts(UCplayer[0], Constants.OpTariff)
-    for CHplayer in CHWTsort:
-        if CHplayer[0].TimeOut:  # monetary penalty for CH timeout (cost of opportunity and operations)
-                    CHplayer[0].payoff = -Constants.Penalty
-                    CHplayer[0].participant.balance += CHplayer[0].payoff
-                    continue        
+    for CHplayer in CHWTsort:  # balance calculation for CH
+        if CHplayer[0].UDTimeOut:  # monetary penalty for CH timeout on "universal days" stage (cost of opportunity and operations)
+            CHplayer[0].payoff -= Constants.UDPenalty
+                    # CHplayer[0].participant.balance += CHplayer[0].payoff
+        if CHplayer[0].CHSDTimeOut:  # monetary penalty for CH timeout on "CH sell days" stage (cost of opportunity and operations)
+            CHplayer[0].payoff -= Constants.CHSDPenalty
         CHplayer[0].participant.balance += CHplayer[0].payoff  # track the CH balance
     # print(ExDat)
     group.ExDat = json.dumps(ExDat)

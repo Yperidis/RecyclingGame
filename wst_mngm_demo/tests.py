@@ -30,7 +30,7 @@ class PlayerBot(Bot):
             Bal = self.player.participant.balance
             Store = self.player.participant.store
             Capac = self.player.participant.capac
-            yield UniversalDays, dict(actionSUC=2, actionPP=3, priceUC=cu(5), actionD=0)                       
+            yield UniversalDays, dict(actionSUC=2, actionPP=3, priceUC=cu(5), actionD=0)
             yield Results
             expect(Bal + self.player.payoff, self.player.participant.balance)
             expect(self.player.actionSUC, self.player.participant.store)  # same for storage

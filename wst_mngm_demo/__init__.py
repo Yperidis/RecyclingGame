@@ -15,17 +15,18 @@ class Constants(BaseConstants):
     pExt = cu(10)  # price per item for external goods
     pDep = pExt/10  # deposit price per item
     g = 5  # rate of waste (item generation per day-round)
-    Penalty = cu(35)  # Inactivity penalty (irresponsible disposal, hygiene hazard, etc.)
-    InitUCBalance, InitCHBalance = (g * pExt + Penalty) * num_rounds, cu(500)  # monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c) and incurring the inactivity penalty.
+    UDPenalty = cu(35)  # Inactivity penalty at the "universal days" stage (irresponsible disposal, hygiene hazard, cost of opportunity for CH, etc.)
+    CHSDPenalty = cu(15)  # Inactivity penalty at the "CH sell days" stage (cost of opportunity, etc.)
+    InitUCBalance, InitCHBalance = (g * pExt + UDPenalty) * num_rounds, ( UDPenalty + CHSDPenalty ) * num_rounds  # Monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c) and incurring the inactivity penalty and all players incurring fees of inactivity.
     UCCmax = 6  # maximum item storage capacity for UC. In this rough form not taking size or weight into account UCCmax>=g.
     CHCmax = 4*UCCmax  # maximum item storage capacity for CH (4x that of UC to meet the difference in UC and CH role allocation (4:1) in the game)
     OpTariff = cu(25)  # fee for operator waste handling
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
     CHQc = UCCmax  # Critical quantity for CH (above which selling to an RE becomes profitable in respect to the item deposit)
-    pCHSellMax = UCCmax * pDep  # Upper bound for profit of CH
+    pCHSellMax = CHCmax * pDep  # Upper bound for profit of CH
     pCirMin = pDep/5  # Lower bound of price at which the waste material can be reintroduced in the circular economy
-    GlobalTimeout = 5  # Timeout for pages
+    GlobalTimeout = 195  # Timeout for pages
 
 
 class Subsession(BaseSubsession):
@@ -47,9 +48,11 @@ class Player(BasePlayer):
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to sell?")
     actionPP = models.IntegerField(min=0, initial=0, label="How many items are you willing to push to the platform?")
     priceUC = models.CurrencyField(min=cu(0), initial=Constants.pUCInit, label="Name the price you are willing to sell items for.")
-    priceCH = models.CurrencyField(min=Constants.pDep, initial=Constants.pCHInit, label="Name the price you are willing to buy items for (at least their deposit " + str(Constants.pDep) + ").")
+    priceCH = models.CurrencyField(min=Constants.pDep, max=Constants.pCHSellMax, initial=Constants.pCHInit, label="Name the price you are willing to buy items for (at least their deposit " + str(Constants.pDep) + ").")
     actionD = models.IntegerField(min=0, initial=0, label="How many items are you willing to dispose through standard means?")
-    TimeOut = models.BooleanField(initial=False)  # a timeout signaling variable
+    UDTimeOut = models.BooleanField(initial=False)  # a "UniversalDays" timeout signaling variable
+    CHSDTimeOut = models.BooleanField(initial=False)  # a "CHSellDays" timeout signaling variable
+
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
     # Fields not set by participant for payoff calculation
@@ -90,16 +93,13 @@ class UniversalDays(Page):
             LHS, RHS = actions['actionSUC'] + actions['actionPP'] + actions['actionD'], Constants.g + Constants.UCCmax - player.participant.capac
             if LHS != RHS:
                 return 'The sum of the items in store, pushed to platform and otherwise disposed must equal the generated waste items plus the current storage for all rounds.'
-            if amount > 0:
-                return "The price you are asking per item exceeds that of the item's deposit in the circular economy by " + str(amount) + ". Try a lower one."
         elif player.role_own == 'CH':
-            amount = actions['priceCH'] + Constants.CHgain - Constants.pExt
             LHS = actions['actionBCH']
             RHS = player.participant.capac  # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
             if LHS > RHS:
                 return 'You cannot buy more than you can store.'
             if player.participant.balance - LHS * actions['priceCH'] <= 0:
-                return 'You cannot afford to buy this quantity.'  # TODO consider debt incurrence here
+                return 'You cannot afford to buy this quantity for the price you named.'  # TODO consider debt incurrence here
 
 
     @staticmethod
@@ -110,7 +110,7 @@ class UniversalDays(Page):
             player.CHOpenDemand = player.actionBCH
 
         if timeout_happened:
-            player.TimeOut = True
+            player.UDTimeOut = True  # signal inactivity for templates
 
         import time
 
@@ -146,6 +146,11 @@ class CHSellDays(Page):
             RHS = player.participant.store
             if LHS > RHS: 
                 return 'You cannot sell more than you have in store.'
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):  # function for backdrop processes while waiting
+        if timeout_happened:
+            player.CHSDTimeOut = True  # signal inactivity for templates
 
 
 class ResultsWaitPage(WaitPage):
