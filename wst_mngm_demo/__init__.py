@@ -150,7 +150,8 @@ class CHSellDays(Page):
     @staticmethod
     def before_next_page(player: Player, timeout_happened):  # function for backdrop processes while waiting
         if timeout_happened:
-            player.CHSDTimeOut = True  # signal inactivity for templates
+            if player.role_own == 'CH':
+                player.CHSDTimeOut = True  # signal inactivity for templates
 
 
 class ResultsWaitPage(WaitPage):

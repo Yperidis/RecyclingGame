@@ -57,7 +57,7 @@
             {{ else }}
                 <td>{{ player.bought }}</td>
                 <td>{{ player.sold }}</td>
-                <td>TODO</td>
+                <td>{{ player.participant.store }}</td>
             {{ endif }}
             <td>{{ player.payoff }}</td>
         </tr>
@@ -160,7 +160,7 @@
     let transactions_list = "";
 
     if (ids.length === 0) {
-        transactions_list += "<tr><td colspan='3'>You did not trade any items in this round.</td></tr>";
+        transactions_list += "<tr><td colspan='3'>You did not trade any items in this round either due to lack of demand or because you did not agree on an item price.</td></tr>";
     } else {
         for(let i = 0; i < ids.length; i++) {
             transactions_list += "<tr><td>" + ids[i] + "</td><td>" + items[i] + "</td><td>" + prices[i] + "</td></tr>";

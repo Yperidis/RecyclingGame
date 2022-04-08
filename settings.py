@@ -45,7 +45,7 @@ SESSION_CONFIGS = [
     dict(
         name='wst_mngm_demo',
         num_demo_participants=4,
-        use_browser_bots=True,
+        use_browser_bots=False,
         app_sequence=['wst_mngm_demo']
     ),
 ]
