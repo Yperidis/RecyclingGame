@@ -8,23 +8,27 @@
     End of day {{ player.round_number }} as {{ player.role_own }} role.
 </h2>
 
+<p>
+    {{ if player.UDTimeOut == True }}
+        The inactivity penalty for UC-CH transactions is {{ Constants.UDPenalty }}. <br>
+    {{ endif }}
 
-{{ if player.UDTimeOut == True }}
-    The inactivity penalty for UC-CH transactions is {{ Constants.UDPenalty }}. <br>
-{{ endif }}
+    {{ if player.CHSDTimeOut == True and player.role_own == 'CH' }}
+        The inactivity penalty for selling to REs is {{ Constants.CHSDPenalty }}. <br>
+    {{ endif }}
 
-{{ if player.CHSDTimeOut == True and player.role_own == 'CH' }}
-    The inactivity penalty for selling to REs is {{ Constants.CHSDPenalty }}. <br>
-{{ endif }}
+    {{ if player.role_own == 'UC' and player.actionD > 0 or player.UCOpenSupply > 0 }}
+        The default operator's tariff is {{ Constants.OpTariff }}. <br>
+    {{ endif }}
 
-{{ if player.role_own == 'UC' and player.actionD > 0 or player.UCOpenSupply > 0 }}
-    The default operator's tariff is {{ Constants.OpTariff }}. <br>
-{{ endif }}
+    {{ if player.role_own == 'CH' and player.actionD > 0 }}
+        The default operator's tariff is {{ Constants.OpTariff }}. <br>
+    {{ endif }}
 
-{{ if player.role_own == 'CH' and player.actionD > 0 }}
-    The default operator's tariff is {{ Constants.OpTariff }}. <br>
-{{ endif }}
-
+    {{ if player.role_own == 'CH' and player.actionRESell > 0 }}
+        The selling price is {{ Constants.pDep }} per item, and the fixed costs of selling are {{ Constants.CHCostsSell }} <br>
+    {{ endif }}
+</p>
 
 {{ if player.role_own == 'UC' or player.role_own == 'CH' }}
 

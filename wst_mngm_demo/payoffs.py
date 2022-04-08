@@ -1,7 +1,7 @@
 def Transactions(group, Constants):
     import json
-    from numpy import log, exp
-    alpha = log(float(Constants.pCHSellMax)/float(Constants.pDep))/(Constants.CHCmax - Constants.CHQc) # For the calculation of the CH-->RE sellings. WARNING! This coefficient should be placed iteratively in case the involved prices and quantities of CH are not equal for all CH.
+    # from numpy import log, exp
+    # alpha = log(float(Constants.pCHSellMax)/float(Constants.pDep))/(Constants.CHCmax - Constants.CHQc) # For the calculation of the CH-->RE sellings. WARNING! This coefficient should be placed iteratively in case the involved prices and quantities of CH are not equal for all CH.
     players = group.get_players()
     wpatUC = { player : player.wait_page_arrival for player in players if player.role_own == 'UC' }  # dictionary of player ID-wait page arrival time
     wpatCH = { player : player.wait_page_arrival for player in players if player.role_own == 'CH' }
@@ -77,7 +77,7 @@ def Transactions(group, Constants):
                             ExDat[str(CHplayer[0].id_in_group) + "_items"] = [CHplayer[0].CHOpenDemand]
                             ExDat[str(CHplayer[0].id_in_group) + "_price"] = [float(ClPr)]
                         CHplayer[0].CHOpenDemand = 0  # track the remaining demand of the CH in question
-                    CHplayer[0].participant.store = Constants.CHCmax - CHplayer[0].participant.capac # calculate current CH storage
+                    CHplayer[0].participant.store = Constants.CHCmax - CHplayer[0].participant.capac  # calculate current CH storage
                     if UCplayer[0].UCOpenSupply == 0:  # if the offer of the UC in question has been spent proceed to the next UC (case of PP=0 accounted for)
                         break
                 else:  # if the CH in question has met their demand proceed to the next CH
@@ -97,8 +97,8 @@ def Transactions(group, Constants):
                 UCplayer[0].participant.capac = 0
         if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             DefaultOperatorCosts(UCplayer[0], Constants.OpTariff)
-    for CHplayer in CHWTsort:  # balance calculation for CH
-        RESellings(CHplayer[0], Constants, alpha, exp)  # CH payoffs from sellings to REs
+    for CHplayer in CHWTsort:  # balance calculation for CH, part 1
+        # RESellings(CHplayer[0], Constants, alpha, exp)  # CH payoffs from sellings to REs
         if CHplayer[0].UDTimeOut:  # monetary penalty for CH timeout on "universal days" stage (cost of opportunity and operations)
             CHplayer[0].payoff -= Constants.UDPenalty
         if CHplayer[0].CHSDTimeOut:  # monetary penalty for CH timeout on "CH sell days" stage (cost of opportunity and operations)
@@ -108,18 +108,29 @@ def Transactions(group, Constants):
     group.ExDat = json.dumps(ExDat)
 
 
+def PayoffsCH(group, Constants):
+    players = group.get_players()
+    wpatCH = {player: player.wait_page_arrival for player in players if player.role_own == 'CH'}
+    CHWTsort = sorted(zip(wpatCH.keys(), wpatCH.values()), key=lambda pair: pair[1])  # sort UC and CH IDs following their waiting time ascending
+    for CHplayer in CHWTsort:  # balance calculation for CH, part 2
+        if CHplayer[0].actionRESell > 0:
+            RESellings(CHplayer[0], Constants)  # CH payoffs from sellings to REs
+        CHplayer[0].participant.balance += CHplayer[0].payoff  # update the CH balance
+
+
 def DefaultOperatorCosts(player, ConstantsOpTariff):
     if player.role_own == 'UC':
         player.payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the UC payoff
         player.participant.balance -= ConstantsOpTariff  # update the UC balance
 
 
-# def RESellings(group,Constants):  # the timeout penalty has already been implemented in the transactions
-def RESellings(CHplayer, Constants, alpha, exp):  # the timeout penalty has already been implemented in the transactions
-    if CHplayer.actionRESell > Constants.CHQc:  # condition for sellings to be profitable for the CH
-        CHplayer.payoff += Constants.pDep * Constants.CHQc + exp(alpha * ( CHplayer.actionRESell - Constants.CHQc ) )  # exponential profit-quantity relation for constants above the Qc for the CH
-    else:
-        CHplayer.payoff += Constants.pDep * CHplayer.actionRESell  # otherwise sell at the market's item deposit price
+#def RESellings(CHplayer, Constants, alpha, exp):  # the timeout penalty has already been implemented in the transactions
+def RESellings(CHplayer, Constants):  # the timeout penalty has already been implemented in the transactions
+    # if CHplayer.actionRESell > Constants.CHQc:  # condition for sellings to be profitable for the CH
+    #     CHplayer.payoff += Constants.pDep * Constants.CHQc + exp(alpha * ( CHplayer.actionRESell - Constants.CHQc ) )  # exponential profit-quantity relation for constants above the Qc for the CH
+    # else:
+    #     CHplayer.payoff += Constants.pDep * CHplayer.actionRESell  # otherwise sell at the market's item deposit price
+    CHplayer.payoff += Constants.pDep * CHplayer.actionRESell - Constants.CHCostsSell  # easier functional form with constant costs of selling
     CHplayer.sold = CHplayer.actionRESell  # total items sold to RE
     CHplayer.participant.store -= CHplayer.actionRESell  # remove the sold items from the storage...
     CHplayer.participant.capac += CHplayer.actionRESell  # and increase capacity respectively

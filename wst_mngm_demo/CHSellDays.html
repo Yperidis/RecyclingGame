@@ -31,7 +31,16 @@
 <img src="{{ static 'wst_mngm_demo/CH.png' }}"/>
 {{ endif }}
 
+<p>
+    On this day, you bought {{ player.bought }} items and now have {{ player.participant.store }} items in store.
+</p>
+
 {{ formfields }}
+
+<p>
+    Selling items will cause you fixed costs of {{ Constants.CHCostsSell }}. <br>
+    These costs arise for each number of items sold other than zero.
+</p>
 
 {{ next_button }} 
 

@@ -7,6 +7,7 @@ doc = """
 Your app description
 """
 
+
 class Constants(BaseConstants):
     name_in_url = 'waste_management_demo'
     players_per_group = 4
@@ -23,7 +24,8 @@ class Constants(BaseConstants):
     OpTariff = cu(25)  # fee for operator waste handling
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
-    CHQc = UCCmax  # Critical quantity for CH (above which selling to an RE becomes profitable in respect to the item deposit)
+    # CHQc = UCCmax  # Critical quantity for CH (above which selling to an RE becomes profitable in respect to the item deposit)
+    CHCostsSell = cu(5)
     pCHSellMax = CHCmax * pDep  # Upper bound for profit of CH
     pCirMin = pDep/5  # Lower bound of price at which the waste material can be reintroduced in the circular economy
     GlobalTimeout = 195  # Timeout for pages
@@ -117,6 +119,10 @@ class UniversalDays(Page):
         player.wait_page_arrival = time.time()  # recording the players' arrival times at the wait pages
 
 
+class TransactionsWaitPage(WaitPage):
+    after_all_players_arrive = 'set_transactions'
+
+
 class CHSellDays(Page):
     form_model = 'player'
     timeout_seconds = Constants.GlobalTimeout
@@ -155,12 +161,11 @@ class CHSellDays(Page):
 
 
 class ResultsWaitPage(WaitPage):
-    after_all_players_arrive = 'set_payoffs'
+    after_all_players_arrive = 'set_CH_earnings'
 
 
 class Results(Page):
     timeout_seconds = Constants.GlobalTimeout
-
 
     @staticmethod
     def js_vars(player: Player):
@@ -181,8 +186,18 @@ def creating_session(subsession):
     Initialization(subsession, Constants)
 
 
-def set_payoffs(group):
+def set_transactions(group):
     Transactions(group, Constants)
 
 
-page_sequence = [UniversalDays, CHSellDays, ResultsWaitPage, Results]
+def set_CH_earnings(group):
+    PayoffsCH(group, Constants)
+
+
+page_sequence = [
+    UniversalDays,
+    TransactionsWaitPage,
+    CHSellDays,
+    ResultsWaitPage,
+    Results
+]
