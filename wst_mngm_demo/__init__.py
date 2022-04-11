@@ -18,14 +18,15 @@ class Constants(BaseConstants):
     g = 5  # rate of waste (item generation per day-round)
     UDPenalty = cu(35)  # Inactivity penalty at the "universal days" stage (irresponsible disposal, hygiene hazard, cost of opportunity for CH, etc.)
     CHSDPenalty = cu(15)  # Inactivity penalty at the "CH sell days" stage (cost of opportunity, etc.)
-    InitUCBalance, InitCHBalance = (g * pExt + UDPenalty) * num_rounds, ( UDPenalty + CHSDPenalty ) * num_rounds  # Monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c) and incurring the inactivity penalty and all players incurring fees of inactivity.
+    OpTariff = cu(25)  # fee for operator waste handling
+    InitUCBalance, InitCHBalance = (g * pExt + max(UDPenalty,OpTariff)) * num_rounds, ( UDPenalty + max(CHSDPenalty,OpTariff) ) * num_rounds  # Monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c). Additionally, it should suffice for the maximum of either incurring the inactivity penalty or opting for the default disposal operator for all rounds and for both players.
     UCCmax = 6  # maximum item storage capacity for UC. In this rough form not taking size or weight into account UCCmax>=g.
     CHCmax = 4*UCCmax  # maximum item storage capacity for CH (4x that of UC to meet the difference in UC and CH role allocation (4:1) in the game)
-    OpTariff = cu(25)  # fee for operator waste handling
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
     # CHQc = UCCmax  # Critical quantity for CH (above which selling to an RE becomes profitable in respect to the item deposit)
-    CHCostsSell = cu(5)
+    CHCostsSell = cu(5)  # accounting for selling costs
+    QREcrit = 2 * CHCostsSell/pDep  # Arbitrary but reflecting a reasonable quantity so that buying from the RE en masse becomes profitable: No of CH x constant
     pCHSellMax = CHCmax * pDep  # Upper bound for profit of CH
     pCirMin = pDep/5  # Lower bound of price at which the waste material can be reintroduced in the circular economy
     GlobalTimeout = 195  # Timeout for pages
@@ -37,14 +38,14 @@ class Subsession(BaseSubsession):
 
 class Group(BaseGroup):
     ExDat = models.StringField()  # a field of variable length where a dictionary of the ID - item No and price are going to be stored for displaying at the results.
+    TotREQuant = models.IntegerField(initial=0)  # variable to track the quantities sold to the RE
 
 
 class Player(BasePlayer):
     role_own = models.StringField()
 
     #### Action set: actionSUC for "UC store", actionPP for "push on platform", actionD for "Dispose through standard means" and priceUC the bidding price per item.
-    #### For CH: BCH "stored through purchase"
-    actionUCBuyBool = models.BooleanField(label="Would you like to buy your necessities from the platform if available?")
+    #### For CH: BCH "stored through purchase", RESell "quantity to be sold to RE"
     actionSUC = models.IntegerField(min=0, max=Constants.UCCmax, initial=0, label="How many items are you willing to store?")
     actionBCH = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to buy?")
     actionRESell = models.IntegerField(min=0, max=Constants.CHCmax, initial=0, label="How many items are you willing to sell?")
@@ -73,11 +74,19 @@ class UniversalDays(Page):
 
 
     @staticmethod
-    def vars_for_template(player: Player):
+    def vars_for_template(player: Player, group: Group):
         if player.role_own == "UC": 
             items_to_handle = player.participant.store + Constants.g
-            SurvivalCosts = Constants.pExt * Constants.g
-            player.participant.balance -= SurvivalCosts
+            round = player.round_number
+            if round > 1:
+                prev_group = group.in_round(round-1)  # reference the group in the previous round
+                if prev_group.TotREQuant > Constants.QREcrit:  # compare what was sold overall to the RE with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs
+                    SurvivalCosts = (-group.TotREQuant + 5) * Constants.g  # reduced survival costs supplied from the RE
+                else:
+                    SurvivalCosts = Constants.pExt * Constants.g  # external survival costs
+            else:
+                SurvivalCosts = Constants.pExt * Constants.g  # external survival costs initially
+            player.participant.balance -= SurvivalCosts  # subtract the default survival costs from the balance
             return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
 
 
