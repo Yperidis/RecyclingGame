@@ -115,6 +115,7 @@ def PayoffsCH(group, Constants):
     for CHplayer in CHWTsort:  # balance calculation for CH, part 2
         if CHplayer[0].actionRESell > 0:
             RESellings(CHplayer[0], Constants)  # CH payoffs from sellings to REs
+            group.TotREQuant += CHplayer[0].actionRESell  # update the overall quantities being sold to the RE
         CHplayer[0].participant.balance += CHplayer[0].payoff  # update the CH balance
 
 

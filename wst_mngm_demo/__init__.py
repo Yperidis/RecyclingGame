@@ -14,6 +14,8 @@ class Constants(BaseConstants):
     # UC_role, CH_role = 'UC', 'CH'
     num_rounds = 3
     pExt = cu(10)  # price per item for external goods
+    pRedMin = pExt/5  # minimum price compared to external, for which the RE can sell back to the UCs
+    REAmpParam = 3  # RE amplification parameter compared to pExt when no items/goods reach the RE (>=1).
     pDep = pExt/10  # deposit price per item
     g = 5  # rate of waste (item generation per day-round)
     UDPenalty = cu(35)  # Inactivity penalty at the "universal days" stage (irresponsible disposal, hygiene hazard, cost of opportunity for CH, etc.)
@@ -25,8 +27,9 @@ class Constants(BaseConstants):
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
     # CHQc = UCCmax  # Critical quantity for CH (above which selling to an RE becomes profitable in respect to the item deposit)
-    CHCostsSell = cu(5)  # accounting for selling costs
-    QREcrit = 2 * CHCostsSell/pDep  # Arbitrary but reflecting a reasonable quantity so that buying from the RE en masse becomes profitable: No of CH x constant
+    CHCostsSell = cu(2)  # accounting for selling costs
+    QREcrit = 2 * CHCostsSell/pDep  # Critical quantity. Arbitrary but reflecting a reasonable quantity so that buying from the RE en masse becomes profitable: No of CH x constant
+    REQmax = (pRedMin - REAmpParam*pExt) * QREcrit/(pExt-REAmpParam*pExt) # For linear p-Q relation: Q_max = (p_min-beta)Q_c/(pExt-beta)
     pCHSellMax = CHCmax * pDep  # Upper bound for profit of CH
     pCirMin = pDep/5  # Lower bound of price at which the waste material can be reintroduced in the circular economy
     GlobalTimeout = 195  # Timeout for pages
@@ -38,7 +41,7 @@ class Subsession(BaseSubsession):
 
 class Group(BaseGroup):
     ExDat = models.StringField()  # a field of variable length where a dictionary of the ID - item No and price are going to be stored for displaying at the results.
-    TotREQuant = models.IntegerField(initial=0)  # variable to track the quantities sold to the RE
+    TotREQuant = models.IntegerField(initial=0)  # variable to track the overall quantities sold to the RE
 
 
 class Player(BasePlayer):
@@ -74,14 +77,18 @@ class UniversalDays(Page):
 
 
     @staticmethod
-    def vars_for_template(player: Player, group: Group):
-        if player.role_own == "UC": 
+    def vars_for_template(player: Player):
+        group = player.group
+        if player.role_own == "UC":
             items_to_handle = player.participant.store + Constants.g
             round = player.round_number
             if round > 1:
                 prev_group = group.in_round(round-1)  # reference the group in the previous round
-                if prev_group.TotREQuant > Constants.QREcrit:  # compare what was sold overall to the RE with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs
-                    SurvivalCosts = (-group.TotREQuant + 5) * Constants.g  # reduced survival costs supplied from the RE
+                if prev_group.TotREQuant > Constants.QREcrit:  # compare what was sold overall to the RE with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs.
+                    if prev_group.TotREQuant <= Constants.REQmax:
+                        SurvivalCosts = ((Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * group.TotREQuant + Constants.REAmpParam*Constants.pExt) * Constants.g  # reduced survival costs supplied from the RE
+                    else:
+                        SurvivalCosts = ((Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * Constants.REQmax + Constants.REAmpParam*Constants.pExt) * Constants.g  # saturation point for price reduction
                 else:
                     SurvivalCosts = Constants.pExt * Constants.g  # external survival costs
             else:
