@@ -86,9 +86,11 @@ class UniversalDays(Page):
                 prev_group = group.in_round(round-1)  # reference the group in the previous round
                 if prev_group.TotREQuant > Constants.QREcrit:  # compare what was sold overall to the RE with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs.
                     if prev_group.TotREQuant <= Constants.REQmax:
-                        SurvivalCosts = ((Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * group.TotREQuant + Constants.REAmpParam*Constants.pExt) * Constants.g  # reduced survival costs supplied from the RE
+                        ItemPrice = ((Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * group.TotREQuant + Constants.REAmpParam*Constants.pExt)
+                        SurvivalCosts = ItemPrice * Constants.g  # reduced survival costs supplied from the RE
                     else:
-                        SurvivalCosts = ((Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * Constants.REQmax + Constants.REAmpParam*Constants.pExt) * Constants.g  # saturation point for price reduction
+                        ItemPrice = ((Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * Constants.REQmax + Constants.REAmpParam*Constants.pExt)
+                        SurvivalCosts = ItemPrice * Constants.g  # saturation point for price reduction as supplied from RE
                 else:
                     SurvivalCosts = Constants.pExt * Constants.g  # external survival costs
             else:
