@@ -60,7 +60,11 @@
                 <td>{{ player.actionD }}</td>                
             {{ else }}
                 <td>{{ player.bought }}</td>
-                <td>{{ player.sold }} for {{ Constants.pDep }}/item - {{ Constants.CHCostsSell }}</td>
+                {{ if player.sold > 0 }}
+                    <td>{{ player.sold }} for {{ Constants.pDep }}/item - {{ Constants.CHCostsSell }}</td>
+                {{ else }}
+                    <td>{{ player.sold }}</td>
+                {{ endif }}
                 <td>{{ player.participant.store }}</td>
             {{ endif }}
             <td>{{ player.payoff }}</td>
