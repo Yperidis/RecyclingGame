@@ -25,10 +25,8 @@ my_public_goods/
 my_simple_survey/
 payment_info/
 prisoner/
-Procfile
 public_goods_simple/
 requirements_base.txt
-requirements.txt
 survey
 traveler_dilemma/
 trust/
