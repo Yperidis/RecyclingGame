@@ -15,7 +15,7 @@ class Constants(BaseConstants):
     num_rounds = 3
     pExt = cu(10)  # price per item for external goods
     pRedMin = pExt/5  # minimum price compared to external, for which the RE can sell back to the UCs
-    REAmpParam = 3  # RE amplification parameter compared to pExt when no items/goods reach the RE (>=1).
+    REAmpParam = 3  # RE amplification parameter compared to pExt when no items/goods reach the RE (>=0).
     pDep = pExt/10  # deposit price per item
     g = 5  # rate of waste (item generation per day-round)
     UDPenalty = cu(35)  # Inactivity penalty at the "universal days" stage (irresponsible disposal, hygiene hazard, cost of opportunity for CH, etc.)
@@ -28,8 +28,8 @@ class Constants(BaseConstants):
     pUCInit, pCHInit = cu(5), cu(5)  # initial price at which UC and CH are willing to sell
     # CHQc = UCCmax  # Critical quantity for CH (above which selling to an RE becomes profitable in respect to the item deposit)
     CHCostsSell = cu(2)  # accounting for selling costs
-    QREcrit = 2 * CHCostsSell/pDep  # Critical quantity. Arbitrary but reflecting a reasonable quantity so that buying from the RE en masse becomes profitable: No of CH x constant
-    REQmax = (pRedMin - REAmpParam*pExt) * QREcrit/(pExt-REAmpParam*pExt) # For linear p-Q relation: Q_max = (p_min-beta)Q_c/(pExt-beta)
+    QREcrit = 2 * int(CHCostsSell/pDep)  # Critical quantity. Arbitrary but reflecting a reasonable quantity so that buying from the RE en masse becomes profitable: No of CH x constant
+    REQmax = (REAmpParam*pExt - pRedMin) * QREcrit/(REAmpParam*pExt - pExt) # For linear p-Q relation: Q_max = (beta-p_min)Q_c/(beta-pExt)
     pCHSellMax = CHCmax * pDep  # Upper bound for profit of CH
     pCirMin = pDep/5  # Lower bound of price at which the waste material can be reintroduced in the circular economy
     GlobalTimeout = 195  # Timeout for pages
@@ -86,10 +86,10 @@ class UniversalDays(Page):
                 prev_group = group.in_round(round-1)  # reference the group in the previous round
                 if prev_group.TotREQuant > Constants.QREcrit:  # compare what was sold overall to the RE with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs.
                     if prev_group.TotREQuant <= Constants.REQmax:
-                        ItemPrice = ((Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * group.TotREQuant + Constants.REAmpParam*Constants.pExt)
+                        ItemPrice = (Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * group.TotREQuant + Constants.REAmpParam*Constants.pExt
                         SurvivalCosts = ItemPrice * Constants.g  # reduced survival costs supplied from the RE
                     else:
-                        ItemPrice = ((Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * Constants.REQmax + Constants.REAmpParam*Constants.pExt)
+                        ItemPrice = (Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * Constants.REQmax + Constants.REAmpParam*Constants.pExt
                         SurvivalCosts = ItemPrice * Constants.g  # saturation point for price reduction as supplied from RE
                 else:
                     SurvivalCosts = Constants.pExt * Constants.g  # external survival costs
