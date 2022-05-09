@@ -33,6 +33,7 @@ class Constants(BaseConstants):
     pCHSellMax = CHCmax * pDep  # Upper bound for profit of CH
     pCirMin = pDep/5  # Lower bound of price at which the waste material can be reintroduced in the circular economy
     GlobalTimeout = 195  # Timeout for pages
+    RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
 
 
 class Subsession(BaseSubsession):
@@ -78,23 +79,25 @@ class UniversalDays(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
-        group = player.group
         if player.role_own == "UC":
             items_to_handle = player.participant.store + Constants.g
             round = player.round_number
-            if round > 1:
-                prev_group = group.in_round(round-1)  # reference the group in the previous round
-                if prev_group.TotREQuant > Constants.QREcrit:  # compare what was sold overall to the RE with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs.
-                    if prev_group.TotREQuant <= Constants.REQmax:
-                        ItemPrice = (Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * group.TotREQuant + Constants.REAmpParam*Constants.pExt
-                        SurvivalCosts = ItemPrice * Constants.g  # reduced survival costs supplied from the RE
+            if round % Constants.RecPeriod == 0:  # every given time-window check 
+                group = player.group
+                prev_groups = group.in_rounds(round-Constants.RecPeriod+1, round-1)  # reference the group in the previous round                
+                # prev_group = group.in_round(round-1)  # reference the group in the previous round
+                for prev_group in prev_groups:
+                    if prev_group.TotREQuant > Constants.QREcrit:  # compare what was sold overall to the RE with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs.
+                        if prev_group.TotREQuant <= Constants.REQmax:
+                            ItemPrice = (Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * group.TotREQuant + Constants.REAmpParam*Constants.pExt
+                            SurvivalCosts = ItemPrice * Constants.g  # reduced survival costs supplied from the RE
+                        else:
+                            ItemPrice = (Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * Constants.REQmax + Constants.REAmpParam*Constants.pExt
+                            SurvivalCosts = ItemPrice * Constants.g  # saturation point for price reduction as supplied from RE
                     else:
-                        ItemPrice = (Constants.pExt-Constants.REAmpParam*Constants.pExt)/Constants.QREcrit * Constants.REQmax + Constants.REAmpParam*Constants.pExt
-                        SurvivalCosts = ItemPrice * Constants.g  # saturation point for price reduction as supplied from RE
-                else:
-                    SurvivalCosts = Constants.pExt * Constants.g  # external survival costs
+                        SurvivalCosts = Constants.pExt * Constants.g  # external survival costs
             else:
-                SurvivalCosts = Constants.pExt * Constants.g  # external survival costs initially
+                SurvivalCosts = Constants.pExt * Constants.g  # external survival costs for intermediate rounds
             player.participant.balance -= SurvivalCosts  # subtract the default survival costs from the balance
             return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
 
