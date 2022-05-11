@@ -17,6 +17,7 @@ def Initialization(subsession, Constants):
             if player.role_own == 'UC':
                 player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
                 player.participant.balance = Constants.InitUCBalance  #- Constants.g * Constants.pExt # initialize balance and cost of initial waste deposit costs for survival of UC
+                player.participant.SurvCost = Constants.pExt  # variable for tracking the survival costs (initialized with the default, external price)
             elif player.role_own == 'CH':
                 player.participant.capac = Constants.CHCmax
                 player.participant.balance = Constants.InitCHBalance  # initialize balance for CH
