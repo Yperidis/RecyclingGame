@@ -131,7 +131,10 @@ def RESellings(CHplayer, Constants):  # the timeout penalty has already been imp
     #     CHplayer.payoff += Constants.pDep * Constants.CHQc + exp(alpha * ( CHplayer.actionRESell - Constants.CHQc ) )  # exponential profit-quantity relation for constants above the Qc for the CH
     # else:
     #     CHplayer.payoff += Constants.pDep * CHplayer.actionRESell  # otherwise sell at the market's item deposit price
-    CHplayer.payoff += Constants.pDep * CHplayer.actionRESell - Constants.CHCostsSell  # simple functional form with constant costs of selling
+    if CHplayer.actionRESell <= Constants.CHCmax/2:
+        CHplayer.payoff += Constants.pDep * CHplayer.actionRESell - Constants.CHCostsSell  # simple functional form with constant costs of selling
+    else:
+        CHplayer.payoff += Constants.REAmpParam * Constants.pDep * CHplayer.actionRESell - Constants.CHCostsSell  # same function form with a multiplicative factor denoting an incentive for the CH to sell greater quantities
     CHplayer.sold = CHplayer.actionRESell  # total items sold to RE
     CHplayer.participant.store -= CHplayer.actionRESell  # remove the sold items from the storage...
     CHplayer.participant.capac += CHplayer.actionRESell  # and increase capacity respectively

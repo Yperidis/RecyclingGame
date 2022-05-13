@@ -1,3 +1,4 @@
+from turtle import pd
 from otree.api import *
 from .payoffs import *
 from .utils import *
@@ -25,14 +26,14 @@ class Constants(BaseConstants):
     # Inactivity penalty at the "CH sell days" stage (cost of opportunity, etc.)
     CHSDPenalty = cu(15)
     OpTariff = cu(25)  # fee for operator waste handling
-    # Monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c). Additionally, it should suffice for the maximum of either incurring the inactivity penalty or opting for the default disposal operator for all rounds and for both players.
-    InitUCBalance, InitCHBalance = (g * pExt + max(UDPenalty, OpTariff)) * \
-                                    num_rounds, (UDPenalty +
-                                                 max(CHSDPenalty, OpTariff)) * num_rounds
     # maximum item storage capacity for UC. In this rough form not taking size or weight into account UCCmax>=g.
     UCCmax = 6
     # maximum item storage capacity for CH (2x that of UC to meet the difference in UC and CH role allocation (4:2) in the game)
-    CHCmax = 2*UCCmax
+    CHCmax = 2*UCCmax    
+    # Monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c). Additionally, it should suffice for the maximum of either incurring the inactivity penalty or opting for the default disposal operator for all rounds and for both players.
+    InitUCBalance, InitCHBalance = (g * pExt + max(UDPenalty, OpTariff)) * \
+                                    num_rounds, (UDPenalty +
+                                                 max(CHSDPenalty, OpTariff) + 4*UCCmax*pDep) * num_rounds
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     # initial price at which UC and CH are willing to sell
     pUCInit, pCHInit = cu(5), cu(5)
@@ -42,7 +43,7 @@ class Constants(BaseConstants):
     QREcrit = CHCmax # 2 * int(CHCostsSell/pDep)
     # For linear p-Q relation: Q_max = (beta-p_min)Q_c/(beta-pExt)
     REQmax = int( (REAmpParam*pExt - pRedMin) * QREcrit/(REAmpParam*pExt - pExt) )
-    pCHSellMax = CHCmax * pDep  # Upper bound for profit of CH
+    pCHSellMax = CHCmax * pDep  # Upper bound for profit of CH from the UC-CH auction
     pCirMin = pDep/5  # Lower bound of price at which the waste material can be reintroduced in the circular economy
     GlobalTimeout = 195  # Timeout for pages
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
@@ -133,8 +134,9 @@ class UniversalDays(Page):
                 # external survival costs for intermediate rounds
                 SurvivalCosts = player.participant.SurvCost * Constants.g
                 # SurvivalCosts = Constants.pExt * Constants.g
-            # subtract the default survival costs from the balance
+            # subtract the default survival costs from the balance and the round's payoff
             player.participant.balance -= SurvivalCosts
+            player.payoff -= SurvivalCosts
             return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
 
     @staticmethod
