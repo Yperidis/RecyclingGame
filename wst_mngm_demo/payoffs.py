@@ -1,22 +1,10 @@
 def Transactions(group, Constants):
     import json
-    # from numpy import log, exp
-    # alpha = log(float(Constants.pCHSellMax)/float(Constants.pDep))/(Constants.CHCmax - Constants.CHQc) # For the calculation of the CH-->RE sellings. WARNING! This coefficient should be placed iteratively in case the involved prices and quantities of CH are not equal for all CH.
     players = group.get_players()
     wpatUC = { player : player.wait_page_arrival for player in players if player.role_own == 'UC' }  # dictionary of player ID-wait page arrival time
     wpatCH = { player : player.wait_page_arrival for player in players if player.role_own == 'CH' }
     UCWTsort, CHWTsort = sorted( zip( wpatUC.keys(), wpatUC.values()), key=lambda pair : pair[1] ), sorted( zip( wpatCH.keys(), wpatCH.values()), key=lambda pair : pair[1] )  # sort UC and CH IDs following their waiting time ascending
-    # UCtemp, CHtemp = {}, {}  # dictionaries-ledgers to store UC and CH transactions
     ExDat = {}
-
-    # UCDim, CHDim = len(UCWTsort), len(CHWTsort)
-    # UCCapac = np.zeros(UCDim)
-    # SUC = 
-    # UCStore = 
-    # UCPrice = 
-    # UCOpenSupply = 
-    # UCPayoff = 
-    # UCBalance = 
 
     for UCplayer in UCWTsort:  # "first come" UC order
         if UCplayer[0].UDTimeOut:  # monetary penalty for UC timeout
@@ -98,7 +86,6 @@ def Transactions(group, Constants):
         if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             DefaultOperatorCosts(UCplayer[0], Constants.OpTariff)
     for CHplayer in CHWTsort:  # balance calculation for CH, part 1
-        # RESellings(CHplayer[0], Constants, alpha, exp)  # CH payoffs from sellings to REs
         if CHplayer[0].UDTimeOut:  # monetary penalty for CH timeout on "universal days" stage (cost of opportunity and operations)
             CHplayer[0].payoff -= Constants.UDPenalty
         if CHplayer[0].CHSDTimeOut:  # monetary penalty for CH timeout on "CH sell days" stage (cost of opportunity and operations)
@@ -125,16 +112,12 @@ def DefaultOperatorCosts(player, ConstantsOpTariff):
         player.participant.balance -= ConstantsOpTariff  # update the UC balance
 
 
-#def RESellings(CHplayer, Constants, alpha, exp):  # the timeout penalty has already been implemented in the transactions
 def RESellings(CHplayer, Constants):  # the timeout penalty has already been implemented in the transactions
-    # if CHplayer.actionRESell > Constants.CHQc:  # condition for sellings to be profitable for the CH
-    #     CHplayer.payoff += Constants.pDep * Constants.CHQc + exp(alpha * ( CHplayer.actionRESell - Constants.CHQc ) )  # exponential profit-quantity relation for constants above the Qc for the CH
+    # if CHplayer.actionRESell <= Constants.CHCmax/2:
+    #     CHplayer.payoff += Constants.pDep * CHplayer.actionRESell - Constants.CHCostsSell  # simple functional form with constant costs of selling
     # else:
-    #     CHplayer.payoff += Constants.pDep * CHplayer.actionRESell  # otherwise sell at the market's item deposit price
-    if CHplayer.actionRESell <= Constants.CHCmax/2:
-        CHplayer.payoff += Constants.pDep * CHplayer.actionRESell - Constants.CHCostsSell  # simple functional form with constant costs of selling
-    else:
-        CHplayer.payoff += Constants.REAmpParam * Constants.pDep * CHplayer.actionRESell - Constants.CHCostsSell  # same function form with a multiplicative factor denoting an incentive for the CH to sell greater quantities
+    #     CHplayer.payoff += Constants.REAmpParam * Constants.pDep * CHplayer.actionRESell - Constants.CHCostsSell  # same function form with a multiplicative factor denoting an incentive for the CH to sell greater quantities
+    CHplayer.payoff += Constants.REAmpParam * Constants.pDep * CHplayer.actionRESell - Constants.CHCostsSell
     CHplayer.sold = CHplayer.actionRESell  # total items sold to RE
     CHplayer.participant.store -= CHplayer.actionRESell  # remove the sold items from the storage...
     CHplayer.participant.capac += CHplayer.actionRESell  # and increase capacity respectively

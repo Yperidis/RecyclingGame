@@ -27,24 +27,20 @@ class Constants(BaseConstants):
     CHSDPenalty = cu(15)
     OpTariff = cu(25)  # fee for operator waste handling
     # maximum item storage capacity for UC. In this rough form not taking size or weight into account UCCmax>=g.
-    UCCmax = 6
+    UCCmax = g
     # maximum item storage capacity for CH (2x that of UC to meet the difference in UC and CH role allocation (4:2) in the game)
     CHCmax = 2*UCCmax    
     # Monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c). Additionally, it should suffice for the maximum of either incurring the inactivity penalty or opting for the default disposal operator for all rounds and for both players.
-    InitUCBalance, InitCHBalance = (g * pExt + max(UDPenalty, OpTariff)) * \
-                                    num_rounds, (UDPenalty +
-                                                 max(CHSDPenalty, OpTariff) + 4*UCCmax*pDep) * num_rounds
+    InitUCBalance, InitCHBalance = (g * pExt + OpTariff) * num_rounds, 2*CHCmax * pDep * num_rounds
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     # initial price at which UC and CH are willing to sell
-    pUCInit, pCHInit = cu(5), cu(5)
+    pUCInit, pCHInit = 0, pDep
     # CHQc = UCCmax  # Critical quantity for CH (above which selling to an RE becomes profitable in respect to the item deposit)
-    CHCostsSell = cu(2)  # accounting for selling costs
+    CHCostsSell = cu(REAmpParam * pDep * CHCmax/2)  # selling costs of CH to RE, calibrated to be profitable above CHCmax/2
     # Critical quantity. Arbitrary but reflecting a reasonable quantity so that buying from the RE en masse becomes profitable: No of CH x constant or the CH maximum capacity
-    QREcrit = CHCmax # 2 * int(CHCostsSell/pDep)
+    QREcrit = CHCmax  # 2 * int(CHCostsSell/pDep)
     # For linear p-Q relation: Q_max = (beta-p_min)Q_c/(beta-pExt)
     REQmax = int( (REAmpParam*pExt - pRedMin) * QREcrit/(REAmpParam*pExt - pExt) )
-    pCHSellMax = CHCmax * pDep  # Upper bound for profit of CH from the UC-CH auction
-    pCirMin = pDep/5  # Lower bound of price at which the waste material can be reintroduced in the circular economy
     GlobalTimeout = 195  # Timeout for pages
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
 
@@ -75,7 +71,7 @@ class Player(BasePlayer):
         min=0, initial=0, label="How many items are you willing to push to the platform?")
     priceUC = models.CurrencyField(min=cu(
         0), initial=Constants.pUCInit, label="Name the price you are willing to sell items for.")
-    priceCH = models.CurrencyField(min=Constants.pDep, max=Constants.pCHSellMax, initial=Constants.pCHInit,
+    priceCH = models.CurrencyField(min=Constants.pDep, initial=Constants.pCHInit,
                                    label="Name the price you are willing to buy items for (at least their deposit " + str(Constants.pDep) + ").")
     actionD = models.IntegerField(
         min=0, initial=0, label="How many items are you willing to dispose through standard means?")
@@ -108,9 +104,7 @@ class UniversalDays(Page):
             group = player.group
             if round > 1:  # after initialization
                 import statistics
-                prev_groups = group.in_rounds(
-                    max(1,round-Constants.RecPeriod+1), round-1)  # average of list objects
-                # prev_group = group.in_round(round-1)  # reference the group in the previous round
+                prev_groups = group.in_rounds(max(1,round-Constants.RecPeriod+1), round-1)  # average of list objects from the specified previous rounds
                 TotREQuant = statistics.mean([prev_group.TotREQuant for prev_group in prev_groups])  # calculating the average amount of items chanelled to the RE over the last Constants.RecPeriod rounds (builds up to that number in case the list is smaller)
                 # compare what was sold overall to the RE in the last Constants.RecPeriod rounds with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs.
                 if TotREQuant > Constants.QREcrit:
@@ -121,10 +115,7 @@ class UniversalDays(Page):
                         SurvivalCosts = ItemPrice * Constants.g
                         player.participant.SurvCost = ItemPrice
                     else:
-                        ItemPrice = Constants.pRedMin
-                        # ItemPrice = (Constants.pExt-Constants.REAmpParam*Constants.pExt) / \
-                        #                 Constants.QREcrit * Constants.REQmax + Constants.REAmpParam*Constants.pExt
-                        # saturation point for price reduction as supplied from RE
+                        ItemPrice = Constants.pRedMin  # saturation point for price reduction as supplied from RE
                         SurvivalCosts = ItemPrice * Constants.g
                         player.participant.SurvCost = ItemPrice
                 else:
