@@ -10,10 +10,10 @@ Your app description
 
 
 class Constants(BaseConstants):
-    name_in_url = 'waste_management_demo'
+    name_in_url = 'waste_management'
     players_per_group = 4
     # UC_role, CH_role = 'UC', 'CH'
-    num_rounds = 3
+    num_rounds = 23
     pExt = cu(10)  # price per item for external goods
     # RE amplification parameter compared to pExt when no items/goods reach the RE (>=0).
     REAmpParam = 3
@@ -91,6 +91,27 @@ class Player(BasePlayer):
 
 
 # PAGES
+class Instructions(Page):
+    form_model = 'player'
+
+
+class GroupWaitPage(WaitPage):
+    after_all_players_arrive = 'set_reset_fields'
+    # group_by_arrival_time = True
+    
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 2  # for 3 trial rounds
+
+
+class MainEntryPrompt(Page):
+    form_model = 'player'
+
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 2  # for 3 trial rounds
+
+
 class UniversalDays(Page):
     form_model = 'player'
     timeout_seconds = Constants.GlobalTimeout
@@ -236,6 +257,9 @@ class Results(Page):
 def creating_session(subsession):
     Initialization(subsession, Constants)
 
+def set_reset_fields(group):
+    ResetFields(group, Constants)
+
 
 def set_transactions(group):
     Transactions(group, Constants)
@@ -246,6 +270,9 @@ def set_CH_earnings(group):
 
 
 page_sequence = [
+    Instructions,
+    GroupWaitPage,
+    MainEntryPrompt,
     UniversalDays,
     TransactionsWaitPage,
     CHSellDays,

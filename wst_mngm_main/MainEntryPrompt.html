@@ -1,0 +1,28 @@
+{{ block title }} 
+    Recycpoly 
+{{ endblock }} 
+{{ block content }} 
+
+<h2>
+    Commencing main game as {{ player.role_own }} role.
+</h2>
+
+
+{{ if player.role_own == 'UC' }}
+<img src="{{ static 'wst_mngm_demo/UC.png' }}"/>
+
+{{ elif player.role_own == 'CH'}}
+<img src="{{ static 'wst_mngm_demo/CH.png' }}"/>
+
+{{ comment }}
+{{ else player.role_own == 'CH'}}
+<img src="{{ static 'wst_mngm_demo/RE.png' }}"/> <br> <br>
+{{ endcomment }}
+
+{{ endif }}
+
+{{ formfields }}
+
+{{ next_button }} 
+
+{{ endblock }}

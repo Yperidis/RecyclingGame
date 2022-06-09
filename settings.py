@@ -43,10 +43,10 @@ from os import environ
 
 SESSION_CONFIGS = [
     dict(
-        name='wst_mngm_demo',
+        name='wst_mngm',
         num_demo_participants=4,
         use_browser_bots=False,
-        app_sequence=['wst_mngm_demo']
+        app_sequence=['wst_mngm_main']
     ),
 ]
 
