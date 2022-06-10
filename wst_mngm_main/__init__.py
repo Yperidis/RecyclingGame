@@ -13,6 +13,7 @@ class Constants(BaseConstants):
     name_in_url = 'waste_management'
     players_per_group = 4
     TrialNo = 3  # the number of trial rounds for the participants
+    DroupOut = 5  # number of rounds of inactivity needed to regard a player as having dropped out
     # UC_role, CH_role = 'UC', 'CH'
     num_rounds = 20 + TrialNo  # total number of rounds
     pExt = cu(10)  # price per item for external goods
@@ -42,7 +43,7 @@ class Constants(BaseConstants):
     QREcrit = CHCmax  # 2 * int(CHCostsSell/pDep)
     # For linear p-Q relation: Q_max = (beta-p_min)Q_c/(beta-pExt)
     REQmax = int( (REAmpParam*pExt - pRedMin) * QREcrit/(REAmpParam*pExt - pExt) )
-    GlobalTimeout = 195  # Timeout for pages
+    GlobalTimeout = 1  # Timeout for pages in seconds
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
 
 
@@ -80,6 +81,7 @@ class Player(BasePlayer):
     UDTimeOut = models.BooleanField(initial=False)
     # a "CHSellDays" timeout signaling variable
     CHSDTimeOut = models.BooleanField(initial=False)
+    Dropout = models.BooleanField(initial=False)  # player field determining dropout at inactivity of a given number of rounds
 
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
@@ -122,6 +124,13 @@ class UniversalDays(Page):
     form_model = 'player'
     timeout_seconds = Constants.GlobalTimeout
     # form_fields = ['actionSUC', 'actionPP', 'actionD', 'WstType']  # the action set
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):  # update drop-out counter accodingly or signal that the player has dropped out respectively
+        if timeout_happened and player.participant.DropoutCounter <= Constants.DroupOut:
+            player.participant.DropoutCounter += 1
+        else:
+            player.Dropout = True
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -208,6 +217,13 @@ class CHSellDays(Page):
     timeout_seconds = Constants.GlobalTimeout
 
     @staticmethod
+    def before_next_page(player, timeout_happened):  # update drop-out counter accodingly or signal that the player has dropped out respectively
+        if timeout_happened and player.participant.DropoutCounter <= Constants.DroupOut:
+            player.participant.DropoutCounter += 1
+        else:
+            player.Dropout = True
+
+    @staticmethod
     def is_displayed(player):
         return player.role_own == 'CH'
 
@@ -279,6 +295,7 @@ page_sequence = [
     Instructions,
     GroupWaitPage,
     MainEntryPrompt,
+    GroupWaitPage,
     UniversalDays,
     TransactionsWaitPage,
     CHSellDays,

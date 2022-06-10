@@ -24,7 +24,6 @@ def Initialization(subsession, Constants):
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
             
 
-
 def ResetFields(group, Constants):
     players = group.get_players()
     roles = ['UC', 'CH']  # assuming two roles, the loop below will always distribute the roles cyclically up to the number of players in the group
@@ -44,4 +43,5 @@ def ResetFields(group, Constants):
             elif player.role_own == 'CH':
                 player.participant.capac = Constants.CHCmax
                 player.participant.balance = Constants.InitCHBalance  # initialize balance for CH
-            player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)    
+            player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
+            player.participant.DropoutCounter = 0  # initializing the drop-out counter for each player
