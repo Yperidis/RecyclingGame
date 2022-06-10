@@ -85,12 +85,14 @@ def Transactions(group, Constants):
                 UCplayer[0].participant.capac = 0
         if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             DefaultOperatorCosts(UCplayer[0], Constants.OpTariff)
+        UCplayer[0].balance = UCplayer[0].participant.balance  # keeping track of the UC balance as a player field
     for CHplayer in CHWTsort:  # balance calculation for CH, part 1
         if CHplayer[0].UDTimeOut:  # monetary penalty for CH timeout on "universal days" stage (cost of opportunity and operations)
             CHplayer[0].payoff -= Constants.UDPenalty
         if CHplayer[0].CHSDTimeOut:  # monetary penalty for CH timeout on "CH sell days" stage (cost of opportunity and operations)
             CHplayer[0].payoff -= Constants.CHSDPenalty
         CHplayer[0].participant.balance += CHplayer[0].payoff  # update the CH balance
+        CHplayer[0].balance = CHplayer[0].participant.balance  # keeping track of the CH balance as a player field
     # print(ExDat)
     group.ExDat = json.dumps(ExDat)
 

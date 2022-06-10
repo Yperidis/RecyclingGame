@@ -12,8 +12,9 @@ Your app description
 class Constants(BaseConstants):
     name_in_url = 'waste_management'
     players_per_group = 4
+    TrialNo = 3  # the number of trial rounds for the participants
     # UC_role, CH_role = 'UC', 'CH'
-    num_rounds = 23
+    num_rounds = 20 + TrialNo  # total number of rounds
     pExt = cu(10)  # price per item for external goods
     # RE amplification parameter compared to pExt when no items/goods reach the RE (>=0).
     REAmpParam = 3
@@ -88,11 +89,16 @@ class Player(BasePlayer):
     CHOpenDemand = models.IntegerField()
     sold = models.IntegerField(initial=0)
     bought = models.IntegerField(initial=0)
+    balance = models.CurrencyField()  # for recording the balance as a player field
 
 
 # PAGES
 class Instructions(Page):
     form_model = 'player'
+
+    @staticmethod
+    def is_displayed(player):
+            return player.round_number == 1  # appears only in the beginning of the game
 
 
 class GroupWaitPage(WaitPage):
@@ -101,7 +107,7 @@ class GroupWaitPage(WaitPage):
     
     @staticmethod
     def is_displayed(player):
-        return player.round_number == 2  # for 3 trial rounds
+        return player.round_number == Constants.TrialNo + 1  # implemented after the trial rounds
 
 
 class MainEntryPrompt(Page):
@@ -109,7 +115,7 @@ class MainEntryPrompt(Page):
 
     @staticmethod
     def is_displayed(player):
-        return player.round_number == 2  # for 3 trial rounds
+        return player.round_number == Constants.TrialNo + 1  # implemented after the trial rounds
 
 
 class UniversalDays(Page):

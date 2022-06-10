@@ -4,9 +4,26 @@
 {{ block content }} 
 
 <h2>
-    Instructions as {{ player.role_own }} role.
+    Introduction: You role is {{ player.role_own }}.
 </h2>
 
+<p>
+In the Recycpoly study, we investigate whether a digital platform aided 
+by various visual stimuli can incentivise people to participate in a 
+decentralized waste management manner as an alternative to such centralized 
+services. The aim is to explore whether and under which conditions this 
+digital, decentralised interface scheme might be a sustainable alternative 
+to central services and harness the support of the public.
+</p>
+
+<p>
+To achieve this, we will ask you to play an online game which requires making 
+decisions about daily solid waste handling given a timed environment. There will 
+be two separate roles to be assumed (consumer and recycling mediator) and information 
+retrieval will be available. However, there will be a penalty if no decision takes 
+place in the allotted time. You will have some trial rounds to familiarize yourself 
+with the game in the beginning.
+</p>
 
 {{ if player.role_own == 'UC' }}
 <img src="{{ static 'wst_mngm_demo/UC.png' }}"/>
@@ -21,7 +38,9 @@
 
 {{ endif }}
 
-{{ formfields }}
+<h5>
+    Please click on the "Next" button to proceed.
+</h5>
 
 {{ next_button }} 
 
