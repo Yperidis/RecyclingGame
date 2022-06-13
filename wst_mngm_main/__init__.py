@@ -43,7 +43,7 @@ class Constants(BaseConstants):
     QREcrit = CHCmax  # 2 * int(CHCostsSell/pDep)
     # For linear p-Q relation: Q_max = (beta-p_min)Q_c/(beta-pExt)
     REQmax = int( (REAmpParam*pExt - pRedMin) * QREcrit/(REAmpParam*pExt - pExt) )
-    GlobalTimeout = 1  # Timeout for pages in seconds
+    GlobalTimeout = 61  # Timeout for pages in seconds
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
 
 
@@ -207,6 +207,9 @@ class UniversalDays(Page):
         # recording the players' arrival times at the wait pages
         player.wait_page_arrival = time.time()
 
+
+class DetailedGamePlayInstructions(Page):
+    pass
 
 class TransactionsWaitPage(WaitPage):
     after_all_players_arrive = 'set_transactions'
