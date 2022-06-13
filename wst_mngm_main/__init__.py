@@ -220,7 +220,7 @@ class CHSellDays(Page):
     def before_next_page(player, timeout_happened):  # update drop-out counter accodingly or signal that the player has dropped out respectively
         if timeout_happened and player.participant.DropoutCounter <= Constants.DroupOut:
             player.participant.DropoutCounter += 1
-        else:
+        elif timeout_happened and player.participant.DropoutCounter > Constants.DroupOut:
             player.Dropout = True
 
     @staticmethod
