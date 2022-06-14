@@ -10,10 +10,11 @@ def Initialization(subsession, Constants):
     for player in players:
         # if player.id_in_group == 1:
         #     player.role_own = roles[2]  # RE assignment
-        if player.id_in_group % num_UCCH == 0:
-            player.role_own = roles[0]  # UC assignment
-        else:
-            player.role_own = roles[1]  # CH assignment
+        # if player.id_in_group % num_UCCH == 0:
+        #     player.role_own = roles[0]  # UC assignment
+        # else:
+        #     player.role_own = roles[1]  # CH assignment
+        player.role_own = roles[player.id_in_group % num_UCCH]
         if player.round_number == 1:# and (player.role_own == 'UC' or player.role_own == 'CH'):
             if player.role_own == 'UC':
                 player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
