@@ -20,7 +20,7 @@ class Constants(BaseConstants):
     # RE amplification parameter compared to pExt when no items/goods reach the RE (>=0).
     REAmpParam = 3
     # minimum price compared to external, for which the RE can sell back to the UCs
-    pRedMin = pExt/5    
+    pRedMin = pExt/5
     pDep = pExt/10  # deposit price per item
     g = 5  # rate of waste (item generation per day-round)
     # Inactivity penalty at the "universal days" stage (irresponsible disposal, hygiene hazard, cost of opportunity for CH, etc.)
@@ -31,19 +31,22 @@ class Constants(BaseConstants):
     # maximum item storage capacity for UC. In this rough form not taking size or weight into account UCCmax>=g.
     UCCmax = g
     # maximum item storage capacity for CH (2x that of UC to meet the difference in UC and CH role allocation (4:2) in the game)
-    CHCmax = 2*UCCmax    
+    CHCmax = 2*UCCmax
     # Monetary balance (in currency units) at the start of the experiment. Should suffice for the UCs buying only externally for the length of the experiment (rate of generation x p_c). Additionally, it should suffice for the maximum of either incurring the inactivity penalty or opting for the default disposal operator for all rounds and for both players.
-    InitUCBalance, InitCHBalance = (g * pExt + OpTariff) * num_rounds, 2*CHCmax * pDep * num_rounds
+    InitUCBalance, InitCHBalance = (
+        g * pExt + OpTariff) * num_rounds, 2*CHCmax * pDep * num_rounds
     # ItemDep = {'Cutlery' : cu(3), 'Bulky' : cu(7), 'Cups' : cu(4)}  # dictionary for various recyclables (PE6) and their deposit value
     # initial price at which UC and CH are willing to sell
     pUCInit, pCHInit = 0, pDep
     # CHQc = UCCmax  # Critical quantity for CH (above which selling to an RE becomes profitable in respect to the item deposit)
-    CHCostsSell = cu(REAmpParam * pDep * CHCmax/2)  # selling costs of CH to RE, calibrated to be profitable above CHCmax/2
+    # selling costs of CH to RE, calibrated to be profitable above CHCmax/2
+    CHCostsSell = cu(REAmpParam * pDep * CHCmax/2)
     # Critical quantity. Arbitrary but reflecting a reasonable quantity so that buying from the RE en masse becomes profitable: No of CH x constant or the CH maximum capacity
     QREcrit = CHCmax  # 2 * int(CHCostsSell/pDep)
     # For linear p-Q relation: Q_max = (beta-p_min)Q_c/(beta-pExt)
-    REQmax = int( (REAmpParam*pExt - pRedMin) * QREcrit/(REAmpParam*pExt - pExt) )
-    GlobalTimeout = 61  # Timeout for pages in seconds
+    REQmax = int((REAmpParam*pExt - pRedMin) *
+                 QREcrit/(REAmpParam*pExt - pExt))
+    GlobalTimeout = 1  # Timeout for pages in seconds
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
 
 
@@ -55,7 +58,8 @@ class Group(BaseGroup):
     # a field of variable length where a dictionary of the ID - item No and price are going to be stored for displaying at the results.
     ExDat = models.StringField()
     # variable to track the overall quantities sold to the RE
-    TotREQuant = models.IntegerField(initial=0)  # variable for tracking the total quantities chanelled to the RE from the CHs
+    # variable for tracking the total quantities chanelled to the RE from the CHs
+    TotREQuant = models.IntegerField(initial=0)
     # treatment dummies
     treatmentPopUp = models.BooleanField(initial=False)
     treatmentLearnMore = models.BooleanField(initial=False)
@@ -84,8 +88,10 @@ class Player(BasePlayer):
     UDTimeOut = models.BooleanField(initial=False)
     # a "CHSellDays" timeout signaling variable
     CHSDTimeOut = models.BooleanField(initial=False)
-    Dropout = models.BooleanField(initial=False)  # player field determining dropout at inactivity of a given number of rounds
-    use_hint = models.BooleanField(initial=False)  # player field saving whether subject clicked on "Learn more"
+    # player field determining dropout at inactivity of a given number of rounds
+    Dropout = models.BooleanField(initial=False)
+    # player field saving whether subject clicked on "Learn more"
+    use_hint = models.BooleanField(initial=False)
 
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
@@ -104,16 +110,17 @@ class Instructions(Page):
 
     @staticmethod
     def is_displayed(player):
-            return player.round_number == 1  # appears only in the beginning of the game
+        return player.round_number == 1  # appears only in the beginning of the game
 
 
 class GroupWaitPage(WaitPage):
     after_all_players_arrive = 'set_reset_fields'
     # group_by_arrival_time = True
-    
+
     @staticmethod
     def is_displayed(player):
-        return player.round_number == Constants.TrialNo + 1  # implemented after the trial rounds
+        # implemented after the trial rounds
+        return player.round_number == Constants.TrialNo + 1
 
 
 class MainEntryPrompt(Page):
@@ -121,7 +128,8 @@ class MainEntryPrompt(Page):
 
     @staticmethod
     def is_displayed(player):
-        return player.round_number == Constants.TrialNo + 1  # implemented after the trial rounds
+        # implemented after the trial rounds
+        return player.round_number == Constants.TrialNo + 1
 
 
 class UniversalDays(Page):
@@ -137,18 +145,23 @@ class UniversalDays(Page):
             group = player.group
             if round > 1:  # after initialization
                 import statistics
-                prev_groups = group.in_rounds(max(1,round-Constants.RecPeriod+1), round-1)  # average of list objects from the specified previous rounds
-                TotREQuant = statistics.mean([prev_group.TotREQuant for prev_group in prev_groups])  # calculating the average amount of items chanelled to the RE over the last Constants.RecPeriod rounds (builds up to that number in case the list is smaller)
+                # average of list objects from the specified previous rounds
+                prev_groups = group.in_rounds(
+                    max(1, round-Constants.RecPeriod+1), round-1)
+                # calculating the average amount of items chanelled to the RE over the last Constants.RecPeriod rounds (builds up to that number in case the list is smaller)
+                TotREQuant = statistics.mean(
+                    [prev_group.TotREQuant for prev_group in prev_groups])
                 # compare what was sold overall to the RE in the last Constants.RecPeriod rounds with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs.
                 if TotREQuant > Constants.QREcrit:
                     if TotREQuant <= Constants.REQmax:
                         ItemPrice = (Constants.pExt-Constants.REAmpParam*Constants.pExt) / \
-                                        Constants.QREcrit * TotREQuant + Constants.REAmpParam*Constants.pExt
+                            Constants.QREcrit * TotREQuant + Constants.REAmpParam*Constants.pExt
                         # reduced survival costs supplied from the RE
                         SurvivalCosts = ItemPrice * Constants.g
                         player.participant.SurvCost = ItemPrice
                     else:
-                        ItemPrice = Constants.pRedMin  # saturation point for price reduction as supplied from RE
+                        # saturation point for price reduction as supplied from RE
+                        ItemPrice = Constants.pRedMin
                         SurvivalCosts = ItemPrice * Constants.g
                         player.participant.SurvCost = ItemPrice
                 else:
@@ -174,7 +187,8 @@ class UniversalDays(Page):
     def error_message(player, actions):
         if player.role_own == 'UC':
             LHS, RHS = actions['actionSUC'] + actions['actionPP'] + \
-                actions['actionD'], Constants.g + Constants.UCCmax - player.participant.capac
+                actions['actionD'], Constants.g + \
+                Constants.UCCmax - player.participant.capac
             if LHS != RHS:
                 return 'The sum of the items in store, pushed to platform and otherwise disposed must equal the generated waste items plus the current storage for all rounds.'
         elif player.role_own == 'CH':
@@ -197,7 +211,8 @@ class UniversalDays(Page):
             player.CHOpenDemand = player.actionBCH
 
         if timeout_happened:
-            player.UDTimeOut = True  # signal inactivity for templates
+            player.UDTimeOut = True  # signal UC inactivity for payoffs
+            player.CHSDTimeOut = True  # signal CH inactivity for payoffs
             player.participant.DropoutCounter += 1
             if player.participant.DropoutCounter > Constants.DroupOut:
                 player.Dropout = True
@@ -217,6 +232,7 @@ class UniversalDays(Page):
 class DetailedGamePlayInstructions(Page):
     pass
 
+
 class TransactionsWaitPage(WaitPage):
     after_all_players_arrive = 'set_transactions'
 
@@ -226,11 +242,15 @@ class CHSellDays(Page):
     timeout_seconds = Constants.GlobalTimeout
 
     @staticmethod
-    def before_next_page(player, timeout_happened):  # update drop-out counter accodingly or signal that the player has dropped out respectively
+    # update drop-out counter accodingly or signal that the player has dropped out respectively
+    def before_next_page(player: Player, timeout_happened):
         if timeout_happened and player.participant.DropoutCounter <= Constants.DroupOut:
             player.participant.DropoutCounter += 1
         elif timeout_happened and player.participant.DropoutCounter > Constants.DroupOut:
             player.Dropout = True
+        if timeout_happened:
+            if player.role_own == 'CH':
+                player.CHSDTimeOut = True  # signal inactivity for payoffs
 
     @staticmethod
     def is_displayed(player):
@@ -254,13 +274,6 @@ class CHSellDays(Page):
             RHS = player.participant.store
             if LHS > RHS:
                 return 'You cannot sell more than you have in store.'
-
-    @staticmethod
-    # function for backdrop processes while waiting
-    def before_next_page(player: Player, timeout_happened):
-        if timeout_happened:
-            if player.role_own == 'CH':
-                player.CHSDTimeOut = True  # signal inactivity for templates
 
 
 class ResultsWaitPage(WaitPage):
