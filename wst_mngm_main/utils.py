@@ -1,9 +1,10 @@
 def Initialization(subsession, Constants):
     # new_structure = [list(range(1, Constants.players_per_group+1))]  # prerequisite to set the number of players in a tabular structure for grouping purposes
     # subsession.set_group_matrix(new_structure)
+    groups = subsession.get_groups()
     players = subsession.get_players()
     # subsession.group_randomly(fixed_id_in_group=True)  # for grouping players randomly upon initialisation but keeping roles constant throughout the rounds    
-    roles = ['UC', 'CH']  # assuming two roles, the loop below will always distribute the roles cyclically up to the number of players in the group
+    roles = ['UC', 'UC', 'CH']  # assuming two roles, the loop below will always distribute the roles cyclically up to the number of players in the group
     num_UCCH = len(roles)
 
     for player in players:
@@ -22,7 +23,15 @@ def Initialization(subsession, Constants):
                 player.participant.capac = Constants.CHCmax
                 player.participant.balance = Constants.InitCHBalance  # initialize balance for CH
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
-            
+
+    for group in groups:
+        group_rounds = group.in_rounds(1, Constants.num_rounds)
+        for group_round in group_rounds:
+            if group.id_in_subsession % 3 == 1:
+                group_round.treatmentPopUp = True
+            elif group.id_in_subsession % 3 == 2:
+                group_round.treatmentLearnMore = True
+
 
 def ResetFields(group, Constants):
     players = group.get_players()

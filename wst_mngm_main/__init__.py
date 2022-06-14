@@ -11,7 +11,7 @@ Your app description
 
 class Constants(BaseConstants):
     name_in_url = 'waste_management'
-    players_per_group = 4
+    players_per_group = 6
     TrialNo = 3  # the number of trial rounds for the participants
     DroupOut = 5  # number of rounds of inactivity needed to regard a player as having dropped out
     # UC_role, CH_role = 'UC', 'CH'
@@ -56,6 +56,9 @@ class Group(BaseGroup):
     ExDat = models.StringField()
     # variable to track the overall quantities sold to the RE
     TotREQuant = models.IntegerField(initial=0)  # variable for tracking the total quantities chanelled to the RE from the CHs
+    # treatment dummies
+    treatmentPopUp = models.BooleanField(initial=False)
+    treatmentLearnMore = models.BooleanField(initial=False)
 
 
 class Player(BasePlayer):
@@ -82,6 +85,7 @@ class Player(BasePlayer):
     # a "CHSellDays" timeout signaling variable
     CHSDTimeOut = models.BooleanField(initial=False)
     Dropout = models.BooleanField(initial=False)  # player field determining dropout at inactivity of a given number of rounds
+    use_hint = models.BooleanField(initial=False)  # player field saving whether subject clicked on "Learn more"
 
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
@@ -126,13 +130,6 @@ class UniversalDays(Page):
     # form_fields = ['actionSUC', 'actionPP', 'actionD', 'WstType']  # the action set
 
     @staticmethod
-    def before_next_page(player, timeout_happened):  # update drop-out counter accodingly or signal that the player has dropped out respectively
-        if timeout_happened and player.participant.DropoutCounter <= Constants.DroupOut:
-            player.participant.DropoutCounter += 1
-        else:
-            player.Dropout = True
-
-    @staticmethod
     def vars_for_template(player: Player):
         if player.role_own == "UC":
             items_to_handle = player.participant.store + Constants.g
@@ -169,9 +166,9 @@ class UniversalDays(Page):
     @staticmethod
     def get_form_fields(player):
         if player.role_own == 'UC':
-            return ['actionSUC', 'actionPP', 'priceUC', 'actionD']
+            return ['actionSUC', 'actionPP', 'priceUC', 'actionD', 'use_hint']
         elif player.role_own == 'CH':
-            return ['actionBCH', 'priceCH']
+            return ['actionBCH', 'priceCH', 'use_hint']
 
     @staticmethod
     def error_message(player, actions):
@@ -201,11 +198,20 @@ class UniversalDays(Page):
 
         if timeout_happened:
             player.UDTimeOut = True  # signal inactivity for templates
+            player.participant.DropoutCounter += 1
+            if player.participant.DropoutCounter > Constants.DroupOut:
+                player.Dropout = True
 
         import time
 
         # recording the players' arrival times at the wait pages
         player.wait_page_arrival = time.time()
+
+    @staticmethod
+    def js_vars(player: Player):
+        return dict(
+            treatmentPopUp=player.group.treatmentPopUp
+        )
 
 
 class DetailedGamePlayInstructions(Page):
@@ -281,6 +287,7 @@ class Results(Page):
 
 def creating_session(subsession):
     Initialization(subsession, Constants)
+
 
 def set_reset_fields(group):
     ResetFields(group, Constants)

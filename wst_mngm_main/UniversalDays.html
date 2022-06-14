@@ -55,13 +55,28 @@
 
 {{ endif }}
 
-<p>
-  Learn <a href="./DetailedGamePlayInstructions.html" target="_blank">more</a> on how to play optimally.
-</p>
+{{ if group.treatmentLearnMore }}
+<br><br>
+<button type="button" onclick="openPopup()" class="btn btn-primary">Learn more on how to play optimally.</button>
+<br><br>
+{{ endif }}
 
 {{ formfields }}
 
-{{ next_button }} 
+{{ next_button }}
+
+<div class="fadeMe" id="grayOut" style="display: none"></div>
+<div class="popup" id="popupBox" style="display: none">
+  {{ if player.role_own == 'UC' }}
+    UC text
+  {{ else }}
+    CH text
+  {{ endif }}
+  <br><br>
+  <button type="button" onclick="closePopup()" class="btn btn-primary">Close</button>
+</div>
+
+<input type="hidden" name="use_hint" id="use_hint" value="0">
 
 {{ endblock }}
 
@@ -87,5 +102,60 @@
         background-color: #5C933F;
         color: white;
     }
+
+    div.fadeMe {
+        opacity:    0.5;
+        background: #000;
+        width:      100%;
+        height:     100%;
+        z-index:    10;
+        top:        0;
+        left:       0;
+        position:   fixed;
+    }
+
+    div.popup {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 400px;
+        height: 300px;
+        margin-left: -200px;
+        margin-top: -150px;
+        background: #ffffff;
+        -moz-border-radius: 10px;
+        -webkit-border-radius: 10px;
+        -khtml-border-radius: 10px;
+        border-radius: 10px;
+        padding: 20px;
+        z-index: 11;
+        text-align: center;
+    }
 </style>
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+  let treatmentPopUp = js_vars.treatmentPopUp;
+
+  window.onload = function() {
+    if (treatmentPopUp) {
+      setTimeout(function() {
+        document.getElementById("grayOut").style.display = "block";
+        document.getElementById("popupBox").style.display = "block";
+        }, 2*1000);
+    }
+  };
+
+  function openPopup() {
+    document.getElementById("grayOut").style.display = "block";
+    document.getElementById("popupBox").style.display = "block";
+    document.getElementById("use_hint").value = true;
+  }
+
+  function closePopup() {
+    document.getElementById("grayOut").style.display = "none";
+    document.getElementById("popupBox").style.display = "none";
+  }
+</script>
 {{ endblock }}
