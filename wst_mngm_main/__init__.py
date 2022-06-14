@@ -46,7 +46,7 @@ class Constants(BaseConstants):
     # For linear p-Q relation: Q_max = (beta-p_min)Q_c/(beta-pExt)
     REQmax = int((REAmpParam*pExt - pRedMin) *
                  QREcrit/(REAmpParam*pExt - pExt))
-    GlobalTimeout = 1  # Timeout for pages in seconds
+    GlobalTimeout = 61  # Timeout for pages in seconds
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
 
 

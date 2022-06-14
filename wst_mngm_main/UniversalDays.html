@@ -61,7 +61,15 @@
 <br><br>
 {{ endif }}
 
-{{ formfields }}
+{{ if player.role_own == "UC" }}
+  {{ formfield 'actionSUC' }}
+  {{ formfield 'actionPP' }}
+  {{ formfield 'priceUC' }}
+  {{ formfield 'actionD' }}
+{{ else }}
+  {{ formfield 'actionBCH' }}
+  {{ formfield 'priceCH' }}
+{{ endif }}
 
 {{ next_button }}
 
