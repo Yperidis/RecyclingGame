@@ -28,7 +28,16 @@
 
 
 {{ if player.role_own == 'CH' }}
-<img src="{{ static 'wst_mngm_demo/CH.png' }}"/>
+<img src="{{ static 'wst_mngm_main/CH.png' }}"/>
+{{ endif }}
+
+{{ if group.treatmentLearnMore }}
+<br><br>
+  Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" target="_blank">more</a> on how to play optimally.
+{{ comment }}
+<button type="button" onclick="openPopup()" class="btn btn-primary">Learn more on how to play optimally.</button>
+{{ endcomment }}
+<br><br>
 {{ endif }}
 
 <p>
@@ -43,6 +52,19 @@
 </p>
 
 {{ next_button }} 
+
+<div class="fadeMe" id="grayOut" style="display: none"></div>
+<div class="popup" id="popupBox" style="display: none">
+  {{ if player.role_own == 'UC' }}
+    UC text
+  {{ else }}
+    CH text
+  {{ endif }}
+  <br><br>
+  <button type="button" onclick="closePopup()" class="btn btn-primary">Close</button>
+</div>
+
+<input type="hidden" name="use_hint" id="use_hint" value="0">
 
 {{ endblock }}
 
@@ -69,4 +91,30 @@
         color: white;
     }
 </style>
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+  let treatmentPopUp = js_vars.treatmentPopUp;
+
+  window.onload = function() {
+    if (treatmentPopUp) {
+      setTimeout(function() {
+        document.getElementById("grayOut").style.display = "block";
+        document.getElementById("popupBox").style.display = "block";
+        }, 2*1000);
+    }
+  };
+
+  function openPopup() {
+    document.getElementById("grayOut").style.display = "block";
+    document.getElementById("popupBox").style.display = "block";
+    document.getElementById("use_hint").value = true;
+  }
+
+  function closePopup() {
+    document.getElementById("grayOut").style.display = "none";
+    document.getElementById("popupBox").style.display = "none";
+  }
+</script>
 {{ endblock }}
