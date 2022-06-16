@@ -275,6 +275,12 @@ class CHSellDays(Page):
             if LHS > RHS:
                 return 'You cannot sell more than you have in store.'
 
+    @staticmethod
+    def js_vars(player: Player):
+        return dict(
+            treatmentPopUp=player.group.treatmentPopUp
+        )
+
 
 class ResultsWaitPage(WaitPage):
     after_all_players_arrive = 'set_CH_earnings'

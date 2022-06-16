@@ -4,17 +4,11 @@ def Initialization(subsession, Constants):
     groups = subsession.get_groups()
     players = subsession.get_players()
     # subsession.group_randomly(fixed_id_in_group=True)  # for grouping players randomly upon initialisation but keeping roles constant throughout the rounds    
-    roles = ['UC', 'UC', 'CH']  # assuming two roles, the loop below will always distribute the roles cyclically up to the number of players in the group
+    roles = ['UC', 'UC', 'CH']  # assuming two roles and six players per group, the loop below will always distribute the roles cyclically up to the number of players in the group
     num_UCCH = len(roles)
 
     for player in players:
-        # if player.id_in_group == 1:
-        #     player.role_own = roles[2]  # RE assignment
-        # if player.id_in_group % num_UCCH == 0:
-        #     player.role_own = roles[0]  # UC assignment
-        # else:
-        #     player.role_own = roles[1]  # CH assignment
-        player.role_own = roles[player.id_in_group % num_UCCH]
+        player.role_own = roles[player.id_in_group % num_UCCH]  # 4 UC and 2 CH players according to roles previously defined
         if player.round_number == 1:# and (player.role_own == 'UC' or player.role_own == 'CH'):
             if player.role_own == 'UC':
                 player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
@@ -26,7 +20,7 @@ def Initialization(subsession, Constants):
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
             player.participant.DropoutCounter = 0  # initializing the drop-out counter for each player
 
-    for group in groups:
+    for group in groups:  #  allocating treatments (popup, detailed, baseline) for 3 groups
         group_rounds = group.in_rounds(1, Constants.num_rounds)
         for group_round in group_rounds:
             if group.id_in_subsession % 3 == 1:
