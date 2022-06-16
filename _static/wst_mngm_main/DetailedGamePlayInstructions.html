@@ -1,15 +1,112 @@
 <h1>
     Recycpoly Manual
 </h1> 
-     
+
+Firstly, you will be provided with a link in your Prolific recruitment page, from
+which you can be directed to the game. Once in the game, you will assume a
+role either of an “urban consumer”, denoted via UC, or of a “carrier-hauler”,
+denoted via CH. In each role you are called to fill in certain fields with numbers
+representing your actions in waste items (imagine any solid waste item and
+assume that all are identical) and (experimental) dollars. Your objective is to
+minimize your costs or/and make a profit overall. Your final balance, if positive,
+is going to be translated to a bonus amounting up to 100% of your base pay.
+
 <h2 id="UC">The UC (Urban Consumer) Role</h2>
 
 <p>
-    Text
+    Imagine the rounds as days in real life. You begin with an initial
+    balance. On each day you need to buy some minimal amount of goods
+    to survive (this is done automatically), which have a certain cost. The
+    total amount of this cost is displayed on the decision page along with
+    your balance, the total amount you can store (capacity), you have stored,
+    you must handle in the round, and the number of generated waste items
+    resulting from your survival needs (see the example of figure 1). You can
+    either dispose the generated waste through standard means (similar to a
+    garbage can) or participate in a decentralized system by forwarding it to a
+    recycling platform. Your survival costs can drop depending on the waste
+    item flow and the recycling process on the platform. Although you might
+    notice this, it is something you influence only indirectly and not on your
+    own.
+</p>
+
+<p>
+    What you need to decide is whether to store (if the capacity is sufficient)
+    the waste items generated, whether to push them to the recycling platform
+    or dispose them via the central manager (standard means).
+</p>
+
+<p>
+    When opting for forwarding waste to the platform, you are essentially
+    attempting to use the decentralized system for waste handling via a simple
+    auction. In particular, what determines whether your items will be sold
+    on the platform is the price you select as well as the demand for them. If
+    you ask more than a CH is willing to pay for buying your items, they will
+    not be sold. If no CH is willing to buy your items or there is no demand
+    for them, then they are stored or, if there is no capacity left, automatically
+    disposed via the central manager (standard means), which incurs a fixed
+    fee.    
+</p>
+
+<p>
+    After you have completed your decisions you will have to wait until the
+    other participants have completed their actions. Once they are done,
+    you will be directed to the results page. There you will find a summary
+    overview of your actions and the results. This includes how many items
+    you have in storage, how many you did (and did not) manage to sell on
+    the platform, your payoff (including the survival costs), to whom you sold,
+    etc.    
+</p>
+
+<p>
+    Note that all decisions need to be taken within a certain time window.
+    Inactivity incurs a monetary penalty on your balance.    
 </p>
 
 <h2 id="CH">The CH (Carrier-Hauler) Role</h2>
 
 <p>
-    Text
+    Imagine the rounds as days in real life. You begin with an initial
+    balance. On each day, you can buy items on a decentralized system for
+    waste handling, if available, for a self-chosen price via a simple auction.
+    These items stem from the UCs in your group. On each day, they generate 
+    waste items and can decide whether to store them, dispose them via
+    standard means (similar to garbage can, no interaction with the platform)
+    or forward and sell them on the platform for a self-chosen price. What 
+    determines whether there are items available that you can buy is dependent
+    on the price you ask for them and their supply by the UCs. If you are
+    willing to buy the items for a price lower than a UC is willing to sell them
+    for, then no transaction takes place. Consequently, if no UC exists meeting 
+    these criteria you end up buying nothing in that round. Given that
+    a transaction takes place, you have to commit to the externally defined
+    deposit p d value of the good that the UC has paid for as a starting price.
+    It is possible to achieve a lower price though if the UC bids for lower than
+    that deposit (e.g. wants to dispense the waste for free) but this is not up
+    to you.
+</p>
+
+<p>
+    After this simple auction has been completed, you are directed to a wait
+    page until every participant has completed their actions. Then you proceed 
+    to the selling decision page, where you can see how much you now
+    have in store, your remaining capacity and your balance. Your single decision 
+    is on the number of items (if any in store) to sell to a recycling entity
+    (RE). See the example page of figure 4. Note that the payoff you get by
+    selling to an RE incurs a fixed cost SC for this service. Your revenue then
+    equals a fixed price times the number of items you sell. To be specific, this
+    price depends on the quantity of items you sell to an RE. If the quantity
+    is above half your capacity, then the fixed price is 3p<sub>d</sub>. 
+    Otherwise it is p<sub>d</sub>.    
+</p>
+
+<p>
+    Finally, once all CHs are done with their respective decisions, you are
+    directed to the results page. There you will find a summary overview of
+    your actions and the results. This includes how many items you have in
+    storage, how many you sold to an RE, your payoff, from whom you bought
+    which amount at which price, etc.    
+</p>
+
+<p>
+    Note that all decisions need to be taken within a certain time window.
+    Inactivity incurs a monetary penalty on your balance.    
 </p>
