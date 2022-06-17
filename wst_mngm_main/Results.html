@@ -30,7 +30,6 @@
     {{ endif }}
 </p>
 
-{{ if player.role_own == 'UC' or player.role_own == 'CH' }}
 
 <table class="table results-table">
     <thead>
@@ -104,15 +103,6 @@
     <tbody id="transactions">
     </tbody>
 </table>
-
-{{ comment }}
-{{ else }}
-  <p>
-      You might have bought some items.
-  </p>
-{{ endcomment }}
-
-{{ endif }}
 
 
 {{ next_button }}

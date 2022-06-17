@@ -78,10 +78,11 @@
 
 <div class="fadeMe" id="grayOut" style="display: none"></div>
 <div class="popup" id="popupBox" style="display: none">
-  {{ if player.role_own == 'UC' }}
-    UC text
-  {{ else }}
-    CH text
+  {{ if player.role_own == 'UC'  and group.treatmentPopUp }}
+    {{ PopUpUCOut }}
+  {{ endif }}
+  {{ if player.role_own == 'CH'  and group.treatmentPopUp }}
+    {{ PopUpCHOut }}
   {{ endif }}
   <br><br>
   <button type="button" onclick="closePopup()" class="btn btn-primary">Close</button>

@@ -2,10 +2,11 @@ from turtle import pd
 from otree.api import *
 from .payoffs import *
 from .utils import *
+import random as rn
 
 
 doc = """
-Your app description
+Recycpoly code
 """
 
 
@@ -48,6 +49,17 @@ class Constants(BaseConstants):
                  QREcrit/(REAmpParam*pExt - pExt))
     GlobalTimeout = 61  # Timeout for pages in seconds
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
+
+    UCPool, CHPool = [], []
+    with open('/home/local/MPIB-BERLIN/bassett/Documents/WebApps/oTree/RecyclingGame/wst_mngm_main/PopUpTips.dat', 'r') as f:  # separating the UC and CH entries for pop-ups in two lists
+        contents = f.readlines()
+        f.close()
+    for i in contents:
+        if i[:3] == 'UC:':
+            UCPool.append(i)
+        else:
+            CHPool.append(i)
+    UCPool, CHPool = tuple(UCPool), tuple(CHPool)  # transforming the lists into tuples (static structures as constants)
 
 
 class Subsession(BaseSubsession):
@@ -139,7 +151,8 @@ class UniversalDays(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
-        if player.role_own == "UC":
+        group = player.group
+        if player.role_own == "UC":  # UC survival costs' deductions from balance
             items_to_handle = player.participant.store + Constants.g
             round = player.round_number
             group = player.group
@@ -174,7 +187,15 @@ class UniversalDays(Page):
             # subtract the default survival costs from the balance and the round's payoff
             player.participant.balance -= SurvivalCosts
             player.payoff -= SurvivalCosts
-            return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
+            if group.treatmentPopUp == True:
+                PopUpUCOut = rn.choice(Constants.UCPool)  # random choice of a UC prompt to add in the template output
+                return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts, PopUpUCOut=PopUpUCOut)
+            else:
+                return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
+        if player.role_own == "CH" and group.treatmentPopUp == True:
+            PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
+            return dict(PopUpCHOut=PopUpCHOut)
+
 
     @staticmethod
     def get_form_fields(player):
