@@ -51,7 +51,7 @@ class Constants(BaseConstants):
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
 
     UCPool, CHPool = [], []
-    with open('./PopUpTips.dat', 'r') as f:  # separating the UC and CH entries for pop-ups in two lists
+    with open('wst_mngm_main/PopUpTips.dat', 'r') as f:  # separating the UC and CH entries for pop-ups in two lists
         contents = f.readlines()
         f.close()
     for i in contents:

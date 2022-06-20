@@ -57,7 +57,7 @@
 
 {{ if group.treatmentLearnMore }}
 <br><br>
-  Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" target="_blank">more</a> on how to play optimally.
+Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" target="_blank" onclick="saveClick()">more</a> on how to play optimally.
 {{ comment }}
 <button type="button" onclick="openPopup()" class="btn btn-primary">Learn more on how to play optimally.</button>
 {{ endcomment }}
@@ -162,6 +162,10 @@
   function openPopup() {
     document.getElementById("grayOut").style.display = "block";
     document.getElementById("popupBox").style.display = "block";
+    document.getElementById("use_hint").value = true;
+  }
+
+  function saveClick() {
     document.getElementById("use_hint").value = true;
   }
 
