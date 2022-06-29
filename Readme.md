@@ -12,7 +12,7 @@ The project has been developed, tested and deployed with the following OS, pytho
 * JSON 2.0.9
 
 ## Otree Installation
-The code can be installed via [pip](https://pypi.org/project/pip/) as per the instruction in the Otree page
+The code can be installed via [pip](https://pypi.org/project/pip/) as per the instructions in the Otree page
 (`pip install otree`).
 
 ## Run Locally
