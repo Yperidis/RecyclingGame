@@ -16,6 +16,7 @@ The code can be installed via [pip](https://pypi.org/project/pip/) as per the in
 (`pip install otree`).
 
 ## Run Locally
+Type `otree devserver` from a terminal in the parent directory and then open the provided URL. Follow the prompts of the GUI to test the experiment locally.
 
 ## Docker Setup
 
