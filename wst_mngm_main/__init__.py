@@ -188,12 +188,15 @@ class UniversalDays(Page):
             player.participant.balance -= SurvivalCosts
             player.payoff -= SurvivalCosts
             if group.treatmentPopUp == True:
-                PopUpUCOut = rn.choice(Constants.UCPool)  # random choice of a UC prompt to add in the template output
+                PopUpUCOut = Constants.UCPool[round-1]
+                # PopUpUCOut = rn.choice(Constants.UCPool)  # random choice of a UC prompt to add in the template output
                 return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts, PopUpUCOut=PopUpUCOut)
             else:
                 return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
         if player.role_own == "CH" and group.treatmentPopUp == True:
-            PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
+            round = player.round_number
+            PopUpCHOut = Constants.UCPool[round-1]
+            # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
             return dict(PopUpCHOut=PopUpCHOut)
 
 
