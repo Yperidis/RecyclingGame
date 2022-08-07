@@ -49,6 +49,7 @@ class Constants(BaseConstants):
                  QREcrit/(REAmpParam*pExt - pExt))
     GlobalTimeout = 61  # Timeout for pages in seconds
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
+    PopUpSuppressedRoundNo = 3  # number of rounds to suppress pop-ups (as trial rounds)
 
     UCPool, CHPool = [], []
     with open('wst_mngm_main/PopUpTips.dat', 'r') as f:  # separating the UC and CH entries for pop-ups in two lists
@@ -152,10 +153,9 @@ class UniversalDays(Page):
     @staticmethod
     def vars_for_template(player: Player):
         group = player.group
+        round = group.round_number
         if player.role_own == "UC":  # UC survival costs' deductions from balance
             items_to_handle = player.participant.store + Constants.g
-            round = player.round_number
-            group = player.group
             if round > 1:  # after initialization
                 import statistics
                 # average of list objects from the specified previous rounds
@@ -187,15 +187,14 @@ class UniversalDays(Page):
             # subtract the default survival costs from the balance and the round's payoff
             player.participant.balance -= SurvivalCosts
             player.payoff -= SurvivalCosts
-            if group.treatmentPopUp == True:
-                PopUpUCOut = Constants.UCPool[round-1]
+            if group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:
+                PopUpUCOut = Constants.UCPool[round-Constants.PopUpSuppressedRoundNo-1]
                 # PopUpUCOut = rn.choice(Constants.UCPool)  # random choice of a UC prompt to add in the template output
                 return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts, PopUpUCOut=PopUpUCOut)
             else:
                 return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
-        if player.role_own == "CH" and group.treatmentPopUp == True:
-            round = player.round_number
-            PopUpCHOut = Constants.UCPool[round-1]
+        if player.role_own == "CH" and group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:
+            PopUpCHOut = Constants.UCPool[round-Constants.PopUpSuppressedRoundNo-1]
             # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
             return dict(PopUpCHOut=PopUpCHOut)
 

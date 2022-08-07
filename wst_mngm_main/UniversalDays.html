@@ -78,10 +78,10 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
 
 <div class="fadeMe" id="grayOut" style="display: none"></div>
 <div class="popup" id="popupBox" style="display: none">
-  {{ if player.role_own == 'UC'  and group.treatmentPopUp }}
+  {{ if player.role_own == 'UC'  and group.treatmentPopUp and player.round_number > Constants.PopUpSuppressedRoundNo }}
     {{ PopUpUCOut }}
   {{ endif }}
-  {{ if player.role_own == 'CH'  and group.treatmentPopUp }}
+  {{ if player.role_own == 'CH'  and group.treatmentPopUp and player.round_number > Constants.PopUpSuppressedRoundNo }}
     {{ PopUpCHOut }}
   {{ endif }}
   <br><br>
