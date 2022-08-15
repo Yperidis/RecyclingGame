@@ -47,7 +47,8 @@
 {{ formfields }}
 
 <p>
-    Selling items will incur fixed costs of {{ Constants.CHCostsSell }}. <br>
+    Selling items (the price increases externally with the quantity you sell) 
+    will incur fixed costs of {{ Constants.CHCostsSell }}. <br>
     These costs arise for any number of items sold other than zero.
 </p>
 
@@ -55,10 +56,8 @@
 
 <div class="fadeMe" id="grayOut" style="display: none"></div>
 <div class="popup" id="popupBox" style="display: none">
-  {{ if player.role_own == 'UC' }}
-    UC text
-  {{ else }}
-    CH text
+  {{ if player.role_own == 'CH' and group.treatmentPopUp and player.round_number > Constants.PopUpSuppressedRoundNo}}
+    {{ PopUpCHOut }}
   {{ endif }}
   <br><br>
   <button type="button" onclick="closePopup()" class="btn btn-primary">Close</button>

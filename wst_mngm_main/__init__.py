@@ -47,7 +47,7 @@ class Constants(BaseConstants):
     # For linear p-Q relation: Q_max = (beta-p_min)Q_c/(beta-pExt)
     REQmax = int((REAmpParam*pExt - pRedMin) *
                  QREcrit/(REAmpParam*pExt - pExt))
-    GlobalTimeout = 61  # Timeout for pages in seconds
+    GlobalTimeout = 60  # Timeout for pages in seconds
     RecPeriod = 2  # recycling time-window for determining RE-provided survival costs
     PopUpSuppressedRoundNo = 3  # number of rounds to suppress pop-ups (as trial rounds)
 
@@ -58,7 +58,7 @@ class Constants(BaseConstants):
     for i in contents:
         if i[:3] == 'UC:':
             UCPool.append(i)
-        else:
+        elif i[:3] == 'CH:':
             CHPool.append(i)
     UCPool, CHPool = tuple(UCPool), tuple(CHPool)  # transforming the lists into tuples (static structures as constants)
 
@@ -194,7 +194,7 @@ class UniversalDays(Page):
             else:
                 return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
         if player.role_own == "CH" and group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:
-            PopUpCHOut = Constants.UCPool[round-Constants.PopUpSuppressedRoundNo-1]
+            PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
             # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
             return dict(PopUpCHOut=PopUpCHOut)
 
@@ -286,9 +286,16 @@ class CHSellDays(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
+        group = player.group
+        round = group.round_number
         if player.role_own == "CH":
             items_to_handle = player.participant.store
-        return dict(items_to_handle=items_to_handle)
+            if group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:  # suppressing pop-ups for trial rounds
+                PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
+                # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
+                return dict(items_to_handle=items_to_handle, PopUpCHOut=PopUpCHOut)
+            else:
+                return dict(items_to_handle=items_to_handle)
 
     @staticmethod
     def error_message(player, actions):
