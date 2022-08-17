@@ -187,14 +187,17 @@ class UniversalDays(Page):
             # subtract the default survival costs from the balance and the round's payoff
             player.participant.balance -= SurvivalCosts
             player.payoff -= SurvivalCosts
+            # TODO Argument of tuples can extend beyond iterable's limits for round>Constants.PopUpSuppressedRoundNo-1. FIX!
             if group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:
-                PopUpUCOut = Constants.UCPool[round-Constants.PopUpSuppressedRoundNo-1]
+                PopUpUCOut = Constants.UCPool[round % len(Constants.UCPool)]  # pop-up appears cyclically as per the modulo of the length of the given UC prompt tuple
+                # PopUpUCOut = Constants.UCPool[round-Constants.PopUpSuppressedRoundNo-1]
                 # PopUpUCOut = rn.choice(Constants.UCPool)  # random choice of a UC prompt to add in the template output
                 return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts, PopUpUCOut=PopUpUCOut)
             else:
                 return dict(items_to_handle=items_to_handle, SurvivalCosts=SurvivalCosts)
         if player.role_own == "CH" and group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:
-            PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
+            PopUpCHOut = Constants.CHPool[round % len(Constants.CHPool)]  # as for the UC case
+            # PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
             # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
             return dict(PopUpCHOut=PopUpCHOut)
 
@@ -291,7 +294,8 @@ class CHSellDays(Page):
         if player.role_own == "CH":
             items_to_handle = player.participant.store
             if group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:  # suppressing pop-ups for trial rounds
-                PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
+                PopUpCHOut = Constants.CHPool[round % len(Constants.CHPool)]  # see the implementation for the UC in the univerasl days class
+                # PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
                 # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
                 return dict(items_to_handle=items_to_handle, PopUpCHOut=PopUpCHOut)
             else:
