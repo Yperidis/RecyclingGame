@@ -96,7 +96,7 @@ class Player(BasePlayer):
     priceCH = models.CurrencyField(min=Constants.pDep, initial=Constants.pCHInit,
                                    label="Name the price you are willing to buy items for (at least their deposit " + str(Constants.pDep) + ").")
     actionD = models.IntegerField(
-        min=0, initial=0, label="How many items are you willing to dispose through standard means?")
+        min=0, initial=0, label="How many items are you willing to dispose through standard means (operator fee is " + str(Constants.OpTariff) + ")?")
     # a "UniversalDays" timeout signaling variable
     UDTimeOut = models.BooleanField(initial=False)
     # a "CHSellDays" timeout signaling variable
@@ -321,7 +321,7 @@ class ResultsWaitPage(WaitPage):
 
 
 class Results(Page):
-    timeout_seconds = Constants.GlobalTimeout
+    # timeout_seconds = Constants.GlobalTimeout
 
     @staticmethod
     def js_vars(player: Player):
@@ -356,7 +356,6 @@ def set_CH_earnings(group):
 
 page_sequence = [
     Instructions,
-    GroupWaitPage,
     MainEntryPrompt,
     GroupWaitPage,
     UniversalDays,

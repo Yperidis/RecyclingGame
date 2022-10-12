@@ -15,7 +15,7 @@ def Transactions(group, Constants):
         UCplayer[0].participant.store = UCplayer[0].actionSUC  # calculate current UC storage
         for CHplayer in CHWTsort:  # "first come" CH order
             if UCplayer[0].priceUC <= CHplayer[0].priceCH:  # condition for the trade to take place
-                if CHplayer[0].CHOpenDemand > 0:  # the demand of the CH in question is non-zero
+                if CHplayer[0].CHOpenDemand > 0 and UCplayer[0].UCOpenSupply > 0:  # the demand of the CH in question is non-zero and there is some supply on the platform from the chosen UC candidate to start with
                     ClPr = (UCplayer[0].priceUC + CHplayer[0].priceCH)/2  # the clearing price (middle between stated prices)
                     if UCplayer[0].UCOpenSupply <= CHplayer[0].CHOpenDemand:  # check the relationship between the UC offer and the CH demand
                         CHplayer[0].CHOpenDemand -= UCplayer[0].UCOpenSupply  # track the remaining supply of the CH in question
@@ -112,6 +112,7 @@ def DefaultOperatorCosts(player, ConstantsOpTariff):
     if player.role_own == 'UC':
         player.payoff -= ConstantsOpTariff  # subtract the standard disposal tariff from the UC payoff
         player.participant.balance -= ConstantsOpTariff  # update the UC balance
+        # player.UCOpenSupply = 0  # get rid of the spare items
 
 
 def RESellings(CHplayer, Constants):  # the timeout penalty has already been implemented in the transactions

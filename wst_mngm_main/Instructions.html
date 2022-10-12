@@ -4,7 +4,7 @@
 {{ block content }} 
 
 <h2>
-    Introduction: You role is {{ player.role_own }}.
+    Introduction:
 </h2>
 
 <p>
@@ -21,7 +21,10 @@ To achieve this, we will ask you to play an online game which requires making
 decisions about daily solid waste handling given a timed environment. There will 
 be two separate roles to be assumed (urban consumer or UC, and carrier-hauler or CH), which 
 will be randomly assigned to you, and further gameplay information 
-retrieval might be available. 
+retrieval might be available. The UC roles generate waste on each round/day and the CH roles 
+handle it if possible. As a UC you automatically pay a default survival cost of supplies, through 
+which you generate the waste. This cost drops the more you dispose through the decentralized waste 
+handling alternative.
 </p>
 
 <p>
@@ -30,17 +33,17 @@ Your decisions, depending on your role, consist of the following:
   <li>UC</li>
   <ul>
     <li>How many items to be stored</li>
-    <li>How many items to be pushed to the decentralized platform</li>
+    <li>How many items to be pushed to the decentralized platform to be exchanged with an available partner</li>
     <li>The desirable selling price per item pushed</li>
-    <li>How many items to be disposed centrally</li>
+    <li>How many items to be disposed centrally (e.g. through municipal services)</li>
   </ul>
   <li>CH</li> 
   <ul>
-    <li>How many items to be bought from the those pushed to the decentralized platform</li>
+    <li>How many items to be bought from those pushed to the decentralized platform by candidate UC partners</li>
     <li>The desirable buying price per item to be bought</li>
     <li>How many items from the ones bought to be sold to recycling entities (the greater the selling quantity, the greater the selling price per item)</li>
   </ul>
-</ul>
+</ul> 
 
 All you need to do is insert the appopriate number in the corresponding fields and click "next" for your actions to be
 recorded. Note that you need to specify explicitly an action for all the items available for handling per round. 
@@ -49,7 +52,6 @@ in question. Be mindful that there will be a penalty if no decision takes
 place in the allotted time. You will have some trial rounds to familiarize yourself 
 with the game in the beginning.
 </p>
-
 
 
 {{ if player.role_own == 'UC' }}
@@ -64,6 +66,12 @@ with the game in the beginning.
 {{ endcomment }}
 
 {{ endif }}
+
+<h2>
+  You role is {{ player.role_own }}.
+</h2>
+
+<br>
 
 <h5>
     Please click on the "Next" button to proceed.
