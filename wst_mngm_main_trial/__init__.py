@@ -1,5 +1,6 @@
 from turtle import pd
 from otree.api import *
+from wst_mngm_main import GroupWaitPage
 from .payoffs import *
 from .utils import *
 import random as rn
@@ -11,12 +12,12 @@ Recycpoly code
 
 
 class Constants(BaseConstants):
-    name_in_url = 'waste_management'
+    name_in_url = 'waste_management_trial'
     players_per_group = 6
     # TrialNo = 3  # the number of trial rounds for the participants
     DroupOut = 5  # number of rounds of inactivity needed to regard a player as having dropped out
     # UC_role, CH_role = 'UC', 'CH'
-    num_rounds = 20 #+ TrialNo  # total number of rounds
+    num_rounds = 3#20 + TrialNo  # total number of rounds
     pExt = cu(10)  # price per item for external goods
     # RE amplification parameter compared to pExt when no items/goods reach the RE (>=0).
     REAmpParam = 3
@@ -73,8 +74,8 @@ class Group(BaseGroup):
     # variable for tracking the total quantities chanelled to the RE from the CHs
     TotREQuant = models.IntegerField(initial=0)
     # treatment dummies
-    treatmentPopUp = models.BooleanField(initial=False)
-    treatmentLearnMore = models.BooleanField(initial=False)
+    # treatmentPopUp = models.BooleanField(initial=False)
+    # treatmentLearnMore = models.BooleanField(initial=False)
 
 
 class Player(BasePlayer):
@@ -117,16 +118,16 @@ class Player(BasePlayer):
 
 
 # PAGES
-# class Instructions(Page):
-#     form_model = 'player'
+class Instructions(Page):
+    form_model = 'player'
 
-#     @staticmethod
-#     def is_displayed(player):
-#         return player.round_number == 1  # appears only in the beginning of the game
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 1  # appears only in the beginning of the game
 
 
 class GroupWaitPage(WaitPage):
-    # after_all_players_arrive = 'set_reset_fields'
+#     after_all_players_arrive = 'set_reset_fields'
     after_all_players_arrive = 'set_survival_costs'
     # group_by_arrival_time = True
 
@@ -135,22 +136,14 @@ class GroupWaitPage(WaitPage):
     #     # implemented after the trial rounds
     #     return player.round_number == Constants.TrialNo + 1
 
-# class ReInitializationGroupWaitPage(WaitPage):
-#     # after_all_players_arrive = 'set_reset_fields'
+
+# class MainEntryPrompt(Page):
+#     form_model = 'player'
 
 #     @staticmethod
 #     def is_displayed(player):
-#         # implemented after the trial rounds in the previous app
-#         return player.round_number == 1
-
-
-class MainEntryPrompt(Page):
-    form_model = 'player'
-
-    @staticmethod
-    def is_displayed(player):
-        # implemented after the trial rounds in the previous app
-        return player.round_number == 1
+#         # implemented after the trial rounds
+#         return player.round_number == Constants.TrialNo + 1
 
 
 class UniversalDays(Page):
@@ -194,18 +187,19 @@ class UniversalDays(Page):
             # # subtract the default survival costs from the balance and the round's payoff
             # player.participant.balance -= SurvivalCosts
             # player.payoff -= SurvivalCosts
-            if group.treatmentPopUp == True: #and round > Constants.PopUpSuppressedRoundNo:
-                PopUpUCOut = Constants.UCPool[round % len(Constants.UCPool)]  # pop-up appears cyclically as per the modulo of the length of the given UC prompt tuple
-                # PopUpUCOut = Constants.UCPool[round-Constants.PopUpSuppressedRoundNo-1]
-                # PopUpUCOut = rn.choice(Constants.UCPool)  # random choice of a UC prompt to add in the template output
-                return dict(items_to_handle=items_to_handle, SurvivalCosts=-player.payoff, PopUpUCOut=PopUpUCOut)
-            else:
-                return dict(items_to_handle=items_to_handle, SurvivalCosts=-player.payoff)
-        if player.role_own == "CH" and group.treatmentPopUp == True: #and round > Constants.PopUpSuppressedRoundNo:
-            PopUpCHOut = Constants.CHPool[round % len(Constants.CHPool)]  # as for the UC case
-            # PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
-            # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
-            return dict(PopUpCHOut=PopUpCHOut)
+            # TODO Argument of tuples can extend beyond iterable's limits for round>Constants.PopUpSuppressedRoundNo-1. FIX!
+            # if group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:
+            #     PopUpUCOut = Constants.UCPool[round % len(Constants.UCPool)]  # pop-up appears cyclically as per the modulo of the length of the given UC prompt tuple
+            #     # PopUpUCOut = Constants.UCPool[round-Constants.PopUpSuppressedRoundNo-1]
+            #     # PopUpUCOut = rn.choice(Constants.UCPool)  # random choice of a UC prompt to add in the template output
+            #     return dict(items_to_handle=items_to_handle, SurvivalCosts=player.payoff, PopUpUCOut=PopUpUCOut)
+            # else:
+            return dict(items_to_handle=items_to_handle, SurvivalCosts=-player.payoff)
+        # if player.role_own == "CH" and group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:
+        #     PopUpCHOut = Constants.CHPool[round % len(Constants.CHPool)]  # as for the UC case
+        #     # PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
+        #     # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
+        #     return dict(PopUpCHOut=PopUpCHOut)
 
 
     @staticmethod
@@ -254,11 +248,11 @@ class UniversalDays(Page):
         # recording the players' arrival times at the wait pages
         player.wait_page_arrival = time.time()
 
-    @staticmethod
-    def js_vars(player: Player):
-        return dict(
-            treatmentPopUp=player.group.treatmentPopUp
-        )
+    # @staticmethod
+    # def js_vars(player: Player):
+    #     return dict(
+    #         treatmentPopUp=player.group.treatmentPopUp
+    #     )
 
 
 class DetailedGamePlayInstructions(Page):
@@ -299,13 +293,13 @@ class CHSellDays(Page):
         round = group.round_number
         if player.role_own == "CH":
             items_to_handle = player.participant.store
-            if group.treatmentPopUp == True: #and round > Constants.PopUpSuppressedRoundNo:  # suppressing pop-ups for trial rounds
-                PopUpCHOut = Constants.CHPool[round % len(Constants.CHPool)]  # see the implementation for the UC in the univerasl days class
-                # PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
-                # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
-                return dict(items_to_handle=items_to_handle, PopUpCHOut=PopUpCHOut)
-            else:
-                return dict(items_to_handle=items_to_handle)
+            # if group.treatmentPopUp == True and round > Constants.PopUpSuppressedRoundNo:  # suppressing pop-ups for trial rounds
+            #     PopUpCHOut = Constants.CHPool[round % len(Constants.CHPool)]  # see the implementation for the UC in the univerasl days class
+            #     # PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
+            #     # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
+            #     return dict(items_to_handle=items_to_handle, PopUpCHOut=PopUpCHOut)
+            # else:
+            return dict(items_to_handle=items_to_handle)
 
     @staticmethod
     def error_message(player, actions):
@@ -315,11 +309,11 @@ class CHSellDays(Page):
             if LHS > RHS:
                 return 'You cannot sell more than you have in store.'
 
-    @staticmethod
-    def js_vars(player: Player):
-        return dict(
-            treatmentPopUp=player.group.treatmentPopUp
-        )
+    # @staticmethod
+    # def js_vars(player: Player):
+    #     return dict(
+    #         treatmentPopUp=player.group.treatmentPopUp
+    #     )
 
 
 class ResultsWaitPage(WaitPage):
@@ -365,8 +359,7 @@ def set_CH_earnings(group):
 
 
 page_sequence = [
-    MainEntryPrompt,
-    # ReInitializationGroupWaitPage,
+    Instructions,
     GroupWaitPage,
     UniversalDays,
     TransactionsWaitPage,

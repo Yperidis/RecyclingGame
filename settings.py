@@ -1,52 +1,12 @@
 from os import environ
 
 
-#SESSION_CONFIGS = [
-#    dict(
-#        name='guess_two_thirds',
-#        display_name="Guess 2/3 of the Average",
-#        app_sequence=['guess_two_thirds', 'payment_info'],
-#        num_demo_participants=3,
-#    ),
-#    dict(
-#        name='survey', app_sequence=['survey', 'payment_info'], num_demo_participants=1
-#    ),
-#]
-
-#SESSION_CONFIGS = [
-#    dict(
-#        name='my_simple_survey',
-#        num_demo_participants=3,
-#        app_sequence=['my_simple_survey']
-#    ),
-#]
-
-
-# SESSION_CONFIGS = [
-#    dict(
-#        name='prisoner',
-#        num_demo_participants=2,
-#        use_browser_bots=True,
-#        app_sequence=['prisoner']
-#    ),
-# ]
-
-
-# SESSION_CONFIGS = [
-#    dict(
-#        name='my_public_goods',
-#        num_demo_participants=3,
-#        use_browser_bots=True,
-#        app_sequence=['my_public_goods']
-#    ),
-# ]
-
 SESSION_CONFIGS = [
     dict(
         name='wst_mngm',
-        num_demo_participants=18,
+        num_demo_participants=6,#18,
         use_browser_bots=False,
-        app_sequence=['wst_mngm_main']
+        app_sequence=['wst_mngm_main_trial', 'wst_mngm_main']
     ),
 ]
 

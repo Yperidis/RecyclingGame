@@ -55,6 +55,7 @@
 
 {{ endif }}
 
+{{ comment }}
 {{ if group.treatmentLearnMore }}
 <br><br>
 Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" target="_blank" onclick="saveClick()">more</a> on how to play optimally.
@@ -63,6 +64,7 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
 {{ endcomment }}
 <br><br>
 {{ endif }}
+{{ endcomment }}
 
 {{ if player.role_own == "UC" }}
   {{ formfield 'actionSUC' }}
@@ -76,12 +78,13 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
 
 {{ next_button }}
 
+{{ comment }}
 <div class="fadeMe" id="grayOut" style="display: none"></div>
 <div class="popup" id="popupBox" style="display: none">
-  {{ if player.role_own == 'UC' and group.treatmentPopUp }}
+  {{ if player.role_own == 'UC' and group.treatmentPopUp and player.round_number > Constants.PopUpSuppressedRoundNo }}
     {{ PopUpUCOut }}
   {{ endif }}
-  {{ if player.role_own == 'CH' and group.treatmentPopUp }}
+  {{ if player.role_own == 'CH' and group.treatmentPopUp and player.round_number > Constants.PopUpSuppressedRoundNo }}
     {{ PopUpCHOut }}
   {{ endif }}
   <br><br>
@@ -89,6 +92,7 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
 </div>
 
 <input type="hidden" name="use_hint" id="use_hint" value="0">
+{{ endcomment }}
 
 {{ endblock }}
 
@@ -146,6 +150,7 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
 </style>
 {{ endblock }}
 
+{{ comment }}
 {{ block scripts }}
 <script>
   let treatmentPopUp = js_vars.treatmentPopUp;
@@ -175,3 +180,4 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
   }
 </script>
 {{ endblock }}
+{{ endcomment }}

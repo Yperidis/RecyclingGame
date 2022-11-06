@@ -31,6 +31,7 @@
 <img src="{{ static 'wst_mngm_main/CH.png' }}"/>
 {{ endif }}
 
+{{ comment }}
 {{ if group.treatmentLearnMore }}
 <br><br>
   Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" target="_blank" onclick="saveClick()">more</a> on how to play optimally.
@@ -39,6 +40,7 @@
 {{ endcomment }}
 <br><br>
 {{ endif }}
+{{ endcomment }}
 
 <p>
     On this day, you bought {{ player.bought }} items and now have {{ player.participant.store }} items in store.
@@ -55,9 +57,10 @@
 
 {{ next_button }} 
 
+{{ comment }}
 <div class="fadeMe" id="grayOut" style="display: none"></div>
 <div class="popup" id="popupBox" style="display: none">
-  {{ if player.role_own == 'CH' and group.treatmentPopUp }}
+  {{ if player.role_own == 'CH' and group.treatmentPopUp and player.round_number > Constants.PopUpSuppressedRoundNo}}
     {{ PopUpCHOut }}
   {{ endif }}
   <br><br>
@@ -65,6 +68,7 @@
 </div>
 
 <input type="hidden" name="use_hint" id="use_hint" value="0">
+{{ endcomment }}
 
 {{ endblock }}
 
@@ -121,6 +125,8 @@
 </style>
 {{ endblock }}
 
+
+{{ comment }}
 {{ block scripts }}
 <script>
   let treatmentPopUp = js_vars.treatmentPopUp;
@@ -150,3 +156,4 @@
   }
 </script>
 {{ endblock }}
+{{ endcomment }}

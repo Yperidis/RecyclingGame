@@ -19,13 +19,13 @@ def Initialization(subsession, Constants):
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
             player.participant.DropoutCounter = 0  # initializing the drop-out counter for each player
 
-    for group in groups:  #  allocating treatments (popup, detailed, baseline) for 3 groups
-        group_rounds = group.in_rounds(1, Constants.num_rounds)
-        for group_round in group_rounds:
-            if group.id_in_subsession % 3 == 1:# and group_round.round_number > Constants.PopUpSuppressedRoundNo:  # suppressing pop-ups on trial rounds
-                group_round.treatmentPopUp = True
-            elif group.id_in_subsession % 3 == 2:
-                group_round.treatmentLearnMore = True
+    # for group in groups:  #  allocating treatments (popup, detailed, baseline) for 3 groups
+    #     group_rounds = group.in_rounds(1, Constants.num_rounds)
+    #     for group_round in group_rounds:
+    #         if group.id_in_subsession % 3 == 1: #and group_round.round_number > Constants.PopUpSuppressedRoundNo:  # suppressing pop-ups on trial rounds
+    #             group_round.treatmentPopUp = True
+    #         elif group.id_in_subsession % 3 == 2:
+    #             group_round.treatmentLearnMore = True
 
 
 def ResetFields(group, Constants):
