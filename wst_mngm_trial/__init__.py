@@ -321,7 +321,7 @@ class ResultsWaitPage(WaitPage):
 
 
 class Results(Page):
-    # timeout_seconds = Constants.GlobalTimeout
+    timeout_seconds = Constants.GlobalTimeout
 
     @staticmethod
     def js_vars(player: Player):

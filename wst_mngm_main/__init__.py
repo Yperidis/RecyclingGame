@@ -135,13 +135,13 @@ class GroupWaitPage(WaitPage):
     #     # implemented after the trial rounds
     #     return player.round_number == Constants.TrialNo + 1
 
-# class ReInitializationGroupWaitPage(WaitPage):
-#     # after_all_players_arrive = 'set_reset_fields'
+class ReInitializationGroupWaitPage(WaitPage):
+    after_all_players_arrive = 'set_reset_fields'
 
-#     @staticmethod
-#     def is_displayed(player):
-#         # implemented after the trial rounds in the previous app
-#         return player.round_number == 1
+    @staticmethod
+    def is_displayed(player):
+        # implemented after the trial rounds in the previous app
+        return player.round_number == 1
 
 
 class MainEntryPrompt(Page):
@@ -327,7 +327,7 @@ class ResultsWaitPage(WaitPage):
 
 
 class Results(Page):
-    # timeout_seconds = Constants.GlobalTimeout
+    timeout_seconds = Constants.GlobalTimeout
 
     @staticmethod
     def js_vars(player: Player):
@@ -366,7 +366,7 @@ def set_CH_earnings(group):
 
 page_sequence = [
     MainEntryPrompt,
-    # ReInitializationGroupWaitPage,
+    ReInitializationGroupWaitPage,
     GroupWaitPage,
     UniversalDays,
     TransactionsWaitPage,

@@ -6,7 +6,7 @@ SESSION_CONFIGS = [
         name='wst_mngm',
         num_demo_participants=6,#18,
         use_browser_bots=False,
-        app_sequence=['wst_mngm_main_trial', 'wst_mngm_main']
+        app_sequence=['wst_mngm_trial', 'wst_mngm_main']
     ),
 ]
 
