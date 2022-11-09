@@ -102,7 +102,7 @@ class Player(BasePlayer):
     # a "CHSellDays" timeout signaling variable
     CHSDTimeOut = models.BooleanField(initial=False)
     # player field determining dropout at inactivity of a given number of rounds
-    Dropout = models.BooleanField(initial=False)
+    # Dropout = models.BooleanField(initial=False)
     # player field saving whether subject clicked on "Learn more"
     use_hint = models.BooleanField(initial=False)
 
@@ -239,9 +239,9 @@ class UniversalDays(Page):
         if timeout_happened:
             player.UDTimeOut = True  # signal UC inactivity for payoffs
             player.CHSDTimeOut = True  # signal CH inactivity for payoffs
-            player.participant.DropoutCounter += 1
-            if player.participant.DropoutCounter > Constants.DroupOut:
-                player.Dropout = True
+            # player.participant.DropoutCounter += 1
+            # if player.participant.DropoutCounter > Constants.DroupOut:
+            #     player.Dropout = True
 
         import time
 
@@ -270,10 +270,10 @@ class CHSellDays(Page):
     @staticmethod
     # update drop-out counter accodingly or signal that the player has dropped out respectively
     def before_next_page(player: Player, timeout_happened):
-        if timeout_happened and player.participant.DropoutCounter <= Constants.DroupOut:
-            player.participant.DropoutCounter += 1
-        elif timeout_happened and player.participant.DropoutCounter > Constants.DroupOut:
-            player.Dropout = True
+        # if timeout_happened and player.participant.DropoutCounter <= Constants.DroupOut:
+        #     player.participant.DropoutCounter += 1
+        # elif timeout_happened and player.participant.DropoutCounter > Constants.DroupOut:
+        #     player.Dropout = True
         if timeout_happened:
             if player.role_own == 'CH':
                 player.CHSDTimeOut = True  # signal inactivity for payoffs
