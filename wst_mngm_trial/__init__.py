@@ -104,7 +104,7 @@ class Player(BasePlayer):
     # player field determining dropout at inactivity of a given number of rounds
     # Dropout = models.BooleanField(initial=False)
     # player field saving whether subject clicked on "Learn more"
-    use_hint = models.BooleanField(initial=False)
+    # use_hint = models.BooleanField(initial=False)
 
     # WstType = models.StringField(choices=[['Cutlery', 'Cutlery'], ['Bulky', 'Bulky'], ['Cups', 'Cups']], label="Describe your item from the available types and upload a photo (latter N/A yet).")  # description of item to be exchanged
 
@@ -205,9 +205,9 @@ class UniversalDays(Page):
     @staticmethod
     def get_form_fields(player):
         if player.role_own == 'UC':
-            return ['actionSUC', 'actionPP', 'priceUC', 'actionD', 'use_hint']
+            return ['actionSUC', 'actionPP', 'priceUC', 'actionD']
         elif player.role_own == 'CH':
-            return ['actionBCH', 'priceCH', 'use_hint']
+            return ['actionBCH', 'priceCH']
 
     @staticmethod
     def error_message(player, actions):

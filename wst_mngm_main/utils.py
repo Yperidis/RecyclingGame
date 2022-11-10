@@ -8,16 +8,16 @@ def Initialization(subsession, Constants):
 
     for player in players:
         player.role_own = roles[player.id_in_group % num_UCCH]  # 4 UC and 2 CH players according to roles previously defined
-        if player.round_number == 1:# and (player.role_own == 'UC' or player.role_own == 'CH'):
-            if player.role_own == 'UC':
-                player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
-                player.participant.balance = Constants.InitUCBalance  #- Constants.g * Constants.pExt # initialize balance and cost of initial waste deposit costs for survival of UC
-                player.participant.SurvCost = Constants.pExt  # variable for tracking the survival costs (initialized with the default, external price)
-            elif player.role_own == 'CH':
-                player.participant.capac = Constants.CHCmax
-                player.participant.balance = Constants.InitCHBalance  # initialize balance for CH
-            player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
-            player.participant.DropoutCounter = 0  # initializing the drop-out counter for each player
+    #     if player.round_number == 1:# and (player.role_own == 'UC' or player.role_own == 'CH'):
+    #         if player.role_own == 'UC':
+    #             player.participant.capac = Constants.UCCmax  # initialise capacity as it is going to appear on Days.html before being affected (see payoffs)
+    #             player.participant.balance = Constants.InitUCBalance  #- Constants.g * Constants.pExt # initialize balance and cost of initial waste deposit costs for survival of UC
+    #             player.participant.SurvCost = Constants.pExt  # variable for tracking the survival costs (initialized with the default, external price)
+    #         elif player.role_own == 'CH':
+    #             player.participant.capac = Constants.CHCmax
+    #             player.participant.balance = Constants.InitCHBalance  # initialize balance for CH
+    #         player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
+    #         player.participant.DropoutCounter = 0  # initializing the drop-out counter for each player
 
     for group in groups:  #  allocating treatments (popup, detailed, baseline) for 3 groups
         group_rounds = group.in_rounds(1, Constants.num_rounds)

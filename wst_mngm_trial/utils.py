@@ -17,7 +17,7 @@ def Initialization(subsession, Constants):
                 player.participant.capac = Constants.CHCmax
                 player.participant.balance = Constants.InitCHBalance  # initialize balance for CH
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
-            # player.participant.DropoutCounter = 0  # initializing the drop-out counter for each player
+            player.participant.DropoutCounter = 0  # initializing the drop-out counter for each player
 
     # for group in groups:  #  allocating treatments (popup, detailed, baseline) for 3 groups
     #     group_rounds = group.in_rounds(1, Constants.num_rounds)

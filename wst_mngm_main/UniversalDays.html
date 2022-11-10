@@ -88,7 +88,9 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
   <button type="button" onclick="closePopup()" class="btn btn-primary">Close</button>
 </div>
 
+{{ if group.treatmentLearnMore }}
 <input type="hidden" name="use_hint" id="use_hint" value="0">
+{{ endif }}
 
 {{ endblock }}
 
