@@ -116,24 +116,9 @@ class Player(BasePlayer):
     balance = models.CurrencyField()  # for recording the balance as a player field
 
 
-# PAGES
-# class Instructions(Page):
-#     form_model = 'player'
-
-#     @staticmethod
-#     def is_displayed(player):
-#         return player.round_number == 1  # appears only in the beginning of the game
-
-
 class GroupWaitPage(WaitPage):
-    # after_all_players_arrive = 'set_reset_fields'
     after_all_players_arrive = 'set_survival_costs'
-    # group_by_arrival_time = True
 
-    # @staticmethod
-    # def is_displayed(player):
-    #     # implemented after the trial rounds
-    #     return player.round_number == Constants.TrialNo + 1
 
 class ReInitializationGroupWaitPage(WaitPage):
     after_all_players_arrive = 'set_reset_fields'
@@ -164,47 +149,13 @@ class UniversalDays(Page):
         round = group.round_number
         if player.role_own == "UC":  # UC survival costs' deductions from balance
             items_to_handle = player.participant.store + Constants.g
-            # if round > 1:  # after initialization
-            #     import statistics
-            #     # average of list objects from the specified previous rounds
-            #     prev_groups = group.in_rounds(max(1, round-Constants.RecPeriod+1), round-1)
-            #     # calculating the average amount of items chanelled to the RE over the last Constants.RecPeriod rounds (builds up to that number in case the list is smaller)
-            #     TotREQuant = statistics.mean([prev_group.TotREQuant for prev_group in prev_groups])
-            #     # compare what was sold overall to the RE in the last Constants.RecPeriod rounds with the critical quantity above which they can sell items at a reduced price to the UCs compared to the external survival costs.
-            #     if TotREQuant > Constants.QREcrit:
-            #         if TotREQuant <= Constants.REQmax:
-            #             ItemPrice = (Constants.pExt-Constants.REAmpParam*Constants.pExt) / \
-            #                 Constants.QREcrit * TotREQuant + Constants.REAmpParam*Constants.pExt
-            #             # reduced survival costs supplied from the RE
-            #             SurvivalCosts = ItemPrice * Constants.g
-            #             player.participant.SurvCost = ItemPrice
-            #         else:
-            #             # saturation point for price reduction as supplied from RE
-            #             ItemPrice = Constants.pRedMin
-            #             SurvivalCosts = ItemPrice * Constants.g
-            #             player.participant.SurvCost = ItemPrice
-            #     else:
-            #         SurvivalCosts = Constants.pExt * Constants.g  # external survival costs
-            #         player.participant.SurvCost = Constants.pExt
-            # else:
-            #     # external survival costs for intermediate rounds
-            #     SurvivalCosts = player.participant.SurvCost * Constants.g
-            # # print(SurvivalCosts)
-            #     # SurvivalCosts = Constants.pExt * Constants.g
-            # # subtract the default survival costs from the balance and the round's payoff
-            # player.participant.balance -= SurvivalCosts
-            # player.payoff -= SurvivalCosts
             if group.treatmentPopUp == True: #and round > Constants.PopUpSuppressedRoundNo:
                 PopUpUCOut = Constants.UCPool[round % len(Constants.UCPool)]  # pop-up appears cyclically as per the modulo of the length of the given UC prompt tuple
-                # PopUpUCOut = Constants.UCPool[round-Constants.PopUpSuppressedRoundNo-1]
-                # PopUpUCOut = rn.choice(Constants.UCPool)  # random choice of a UC prompt to add in the template output
                 return dict(items_to_handle=items_to_handle, SurvivalCosts=-player.payoff, PopUpUCOut=PopUpUCOut)
             else:
                 return dict(items_to_handle=items_to_handle, SurvivalCosts=-player.payoff)
         if player.role_own == "CH" and group.treatmentPopUp == True: #and round > Constants.PopUpSuppressedRoundNo:
             PopUpCHOut = Constants.CHPool[round % len(Constants.CHPool)]  # as for the UC case
-            # PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
-            # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
             return dict(PopUpCHOut=PopUpCHOut)
 
 
@@ -301,8 +252,6 @@ class CHSellDays(Page):
             items_to_handle = player.participant.store
             if group.treatmentPopUp == True: #and round > Constants.PopUpSuppressedRoundNo:  # suppressing pop-ups for trial rounds
                 PopUpCHOut = Constants.CHPool[round % len(Constants.CHPool)]  # see the implementation for the UC in the univerasl days class
-                # PopUpCHOut = Constants.CHPool[round-Constants.PopUpSuppressedRoundNo-1]
-                # PopUpCHOut = rn.choice(Constants.CHPool)  # random choice of a CH prompt to add in the template output
                 return dict(items_to_handle=items_to_handle, PopUpCHOut=PopUpCHOut)
             else:
                 return dict(items_to_handle=items_to_handle)

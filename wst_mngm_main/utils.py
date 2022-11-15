@@ -44,6 +44,7 @@ def ResetFields(group, Constants):
                 player.participant.capac = Constants.CHCmax
                 player.participant.balance = Constants.InitCHBalance  # initialize balance for CH
             player.participant.store = 0  # initialize storage as it is going to appear on Days.html before being affected (see payoffs)
+            player.participant.DropoutCounter = 0  # resetting the drop-out counter for each player
 
 def SurvivalCosts(group, Constants):
     players = group.get_players()
@@ -75,7 +76,6 @@ def SurvivalCosts(group, Constants):
             else:
                 # external survival costs for intermediate rounds
                 SurvivalCosts = player.participant.SurvCost * Constants.g
-            # print(SurvivalCosts)
                 # SurvivalCosts = Constants.pExt * Constants.g
             # subtract the default survival costs from the balance and the round's payoff
             player.participant.balance -= SurvivalCosts
