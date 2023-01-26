@@ -68,13 +68,25 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
   {{ formfield 'actionSUC' }}
   {{ formfield 'actionPP' }}
   {{ formfield 'priceUC' }}
+  {{ comment }}
   {{ formfield 'actionD' }}
+  {{ endcomment }}
+
 {{ else }}
   {{ formfield 'actionBCH' }}
   {{ formfield 'priceCH' }}
 {{ endif }}
 
 {{ next_button }}
+
+
+{{ comment }}
+<div class="slidecontainer">
+{{ if player.role_own == 'UC' }}
+  <input type="range" id="items_to_handle" name="items_to_handle" min="0" max="5" class="slider"> &nbsp; <span id="items_to_handle">&nbsp;</span>
+{{ endif }}
+</div>
+{{ endcomment }}
 
 <div class="fadeMe" id="grayOut" style="display: none"></div>
 <div class="popup" id="popupBox" style="display: none">
@@ -145,6 +157,40 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
         z-index: 11;
         text-align: center;
     }
+/*
+  .slidecontainer {
+   width: 100%;
+    }
+    .slider {
+      -webkit-appearance: none;
+      width: 25%;
+      height: 15px;
+      border-radius: 5px;
+      background: #d3d3d3;
+      outline: none;
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+    }
+    .slider:hover {
+      opacity: 1;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #0d6efd;
+      cursor: pointer;
+    }
+    .slider::-moz-range-thumb {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #0d6efd;
+      cursor: pointer;
+    }*/   
 </style>
 {{ endblock }}
 
@@ -175,5 +221,12 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
     document.getElementById("grayOut").style.display = "none";
     document.getElementById("popupBox").style.display = "none";
   }
+/*
+  var slider_var = document.getElementById("items_to_handle");
+
+slider_var.oninput = function() {
+  var choice = this.value;
+  document.getElementById("items_to_handle").innerHTML = choice;
+}*/
 </script>
 {{ endblock }}

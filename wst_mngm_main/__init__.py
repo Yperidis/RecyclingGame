@@ -94,8 +94,8 @@ class Player(BasePlayer):
         0), initial=Constants.pUCInit, label="Name the price you are willing to sell items for.")
     priceCH = models.CurrencyField(min=Constants.pDep, initial=Constants.pCHInit,
                                    label="Name the price you are willing to buy items for (at least their deposit " + str(Constants.pDep) + ").")
-    actionD = models.IntegerField(
-        min=0, initial=0, label="How many items are you willing to dispose through standard means (operator fee is " + str(Constants.OpTariff) + ")?")
+    # actionD = models.IntegerField(
+    #     min=0, initial=0, label="How many items are you willing to dispose through standard means (operator fee is " + str(Constants.OpTariff) + ")?")
     # a "UniversalDays" timeout signaling variable
     UDTimeOut = models.BooleanField(initial=False)
     # a "CHSellDays" timeout signaling variable
@@ -162,18 +162,22 @@ class UniversalDays(Page):
     @staticmethod
     def get_form_fields(player):
         if player.role_own == 'UC':
-            return ['actionSUC', 'actionPP', 'priceUC', 'actionD', 'use_hint']
+            return ['actionSUC', 'actionPP', 'priceUC', 'use_hint']            
+            # return ['actionSUC', 'actionPP', 'priceUC', 'actionD', 'use_hint']
         elif player.role_own == 'CH':
             return ['actionBCH', 'priceCH', 'use_hint']
 
     @staticmethod
     def error_message(player, actions):
         if player.role_own == 'UC':
-            LHS, RHS = actions['actionSUC'] + actions['actionPP'] + \
-                actions['actionD'], Constants.g + \
+            LHS, RHS = actions['actionSUC'] + actions['actionPP'], \
+                Constants.g + \
                 Constants.UCCmax - player.participant.capac
+            # LHS, RHS = actions['actionSUC'] + actions['actionPP'] + \
+            #     actions['actionD'], Constants.g + \
+            #     Constants.UCCmax - player.participant.capac
             if LHS != RHS:
-                return 'The sum of the items in store, pushed to platform and otherwise disposed must equal the generated waste items plus the current storage for all rounds.'
+                return 'The sum of the items in store and of those pushed to the platform must equal the generated waste items plus the current storage for all rounds.'
         elif player.role_own == 'CH':
             LHS = actions['actionBCH']
             # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
