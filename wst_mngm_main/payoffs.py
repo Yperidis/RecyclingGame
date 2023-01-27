@@ -83,8 +83,7 @@ def Transactions(group, Constants):
                 UCplayer[0].participant.store = Constants.UCCmax
                 UCplayer[0].UCOpenSupply -= UCplayer[0].participant.capac
                 UCplayer[0].participant.capac = 0
-        if UCplayer[0].UCOpenSupply > 0:  # calculate the costs of items that did not reach the bargain on the platform                
-        # if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
+        if UCplayer[0].actionD > 0 or UCplayer[0].UCOpenSupply > 0:  # calculate the costs of a potential standard disposal by choice or by items that did not reach the bargain on the platform
             DefaultOperatorCosts(UCplayer[0], Constants.OpTariff)
         UCplayer[0].balance = UCplayer[0].participant.balance  # keeping track of the UC balance as a player field
     for CHplayer in CHWTsort:  # balance calculation for CH, part 1

@@ -29,7 +29,7 @@ class Constants(BaseConstants):
     UDPenalty = cu(35)
     # Inactivity penalty at the "CH sell days" stage (cost of opportunity, etc.)
     CHSDPenalty = cu(15)
-    OpTariff = cu(25)  # fee for operator waste handling. Should be less than the RE selling costs. Otherwise the whole endeavour of the CH channeling the waste to the central manager is superfluous.
+    OpTariff = cu(25)  # fee for operator waste handling
     # maximum item storage capacity for UC. In this rough form not taking size or weight into account UCCmax>=g.
     UCCmax = g
     # maximum item storage capacity for CH (2x that of UC to meet the difference in UC and CH role allocation (4:2) in the game)
@@ -95,8 +95,8 @@ class Player(BasePlayer):
         0), initial=Constants.pUCInit, label="Name the price you are willing to sell items for.")
     priceCH = models.CurrencyField(min=Constants.pDep, initial=Constants.pCHInit,
                                    label="Name the price you are willing to buy items for (at least their deposit " + str(Constants.pDep) + ").")
-    # actionD = models.IntegerField(
-        # min=0, initial=0, label="How many items are you willing to dispose through standard means (operator fee is " + str(Constants.OpTariff) + ")?")
+    actionD = models.IntegerField(
+        min=0, initial=0, label="How many items are you willing to dispose through standard means (operator fee is " + str(Constants.OpTariff) + ")?")
     # a "UniversalDays" timeout signaling variable
     UDTimeOut = models.BooleanField(initial=False)
     # a "CHSellDays" timeout signaling variable
@@ -136,28 +136,24 @@ class UniversalDays(Page):
     def vars_for_template(player: Player):
         if player.role_own == "UC":  # UC survival costs' deductions from balance
             items_to_handle = player.participant.store + Constants.g
-            return dict(items_to_handle=items_to_handle, Min=-items_to_handle, SurvivalCosts=-player.payoff)
+            return dict(items_to_handle=items_to_handle, SurvivalCosts=-player.payoff)
 
 
     @staticmethod
     def get_form_fields(player):
         if player.role_own == 'UC':
-            return ['actionSUC', 'actionPP', 'priceUC']
-            # return ['actionSUC', 'actionPP', 'priceUC', 'actionD']
+            return ['actionSUC', 'actionPP', 'priceUC', 'actionD']
         elif player.role_own == 'CH':
             return ['actionBCH', 'priceCH']
 
     @staticmethod
     def error_message(player, actions):
         if player.role_own == 'UC':
-            # LHS, RHS = actions['actionSUC'] + actions['actionPP'] \
-            #     ,actions['actionD'] + Constants.g + \
-            #     Constants.UCCmax - player.participant.capac            
-            LHS, RHS = actions['actionSUC'] + actions['actionPP'], \
-                Constants.g + \
+            LHS, RHS = actions['actionSUC'] + actions['actionPP'] + \
+                actions['actionD'], Constants.g + \
                 Constants.UCCmax - player.participant.capac
             if LHS != RHS:
-                return 'The sum of the items in store and of those pushed to the platform must equal the generated waste items plus the current storage for all rounds.'
+                return 'The sum of the items in store, pushed to platform and otherwise disposed must equal the generated waste items plus the current storage for all rounds.'
         elif player.role_own == 'CH':
             LHS = actions['actionBCH']
             # TODO pick a UC and include what they pushed in the round at hand (the criteria for the picked one are: 1. that the CH maximizes their profit, 2. that the CH is closest to the UC and 3. that the UC is willing to pair)
@@ -215,11 +211,13 @@ class CHSellDays(Page):
         if player.role_own == 'CH':
             return ['actionRESell']
 
-    # @staticmethod
-    # def vars_for_template(player: Player):
-    #     if player.role_own == "CH":
-    #         items_to_handle = player.participant.store
-    #         return dict(items_to_handle=items_to_handle)
+    @staticmethod
+    def vars_for_template(player: Player):
+        group = player.group
+        round = group.round_number
+        if player.role_own == "CH":
+            items_to_handle = player.participant.store
+            return dict(items_to_handle=items_to_handle)
 
     @staticmethod
     def error_message(player, actions):
