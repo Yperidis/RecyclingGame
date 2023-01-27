@@ -4,7 +4,7 @@ from os import environ
 SESSION_CONFIGS = [
     dict(
         name='wst_mngm',
-        num_demo_participants=6,#18,
+        num_demo_participants=18,
         use_browser_bots=False,
         app_sequence=['wst_mngm_trial', 'wst_mngm_main']
     ),
