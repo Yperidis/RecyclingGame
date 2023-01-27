@@ -17,13 +17,15 @@
         The inactivity penalty for selling to REs is {{ Constants.CHSDPenalty }}. <br>
     {{ endif }}
 
-    {{ if player.role_own == 'UC' and player.actionD > 0 or player.UCOpenSupply > 0 }}
+    {{ if player.role_own == 'UC' and player.UCOpenSupply > 0 }}
         The default operator's tariff is {{ Constants.OpTariff }}. <br>
     {{ endif }}
 
+    {{ comment }}
     {{ if player.role_own == 'CH' and player.actionD > 0 }}
         The default operator's tariff is {{ Constants.OpTariff }}. <br>
     {{ endif }}
+    {{ endcomment }}
 
     {{ if player.role_own == 'CH' and player.actionRESell > 0 }}
         The selling price is {{ Constants.pDep }} per item, and the fixed costs of selling are {{ Constants.CHCostsSell }} <br>
@@ -39,7 +41,9 @@
                 <th scope="col">Pushed to platform</th>
                 <th scope="col">Sold on platform</th>
                 <th scope="col">Not sold to any CH</th>
+                {{ comment }}
                 <th scope="col">Disposed through standard means</th>
+                {{ endcomment }}
             {{ endif }}
             {{ if player.role_own == 'CH' }}
                 <th scope="col">Bought from UC</th>
@@ -56,11 +60,13 @@
                 <td>{{ player.actionPP }}</td>
                 <td>{{ player.sold }}</td>
                 <td>{{ player.UCOpenSupply }}</td>
-                <td>{{ player.actionD }}</td>                
+                {{ comment }}
+                <td>{{ player.actionD }}</td>
+                {{ endcomment }}                
             {{ else }}
                 <td>{{ player.bought }}</td>
                 {{ if player.sold > 0 }}
-                    <td>{{ player.sold }} items for {{ Constants.pDep }}/item - {{ Constants.CHCostsSell }}</td>
+                    <td>{{ player.sold }} items for {{ Constants.pDep }}/item</td>
                 {{ else }}
                     <td>{{ player.sold }}</td>
                 {{ endif }}
