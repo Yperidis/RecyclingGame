@@ -9,46 +9,41 @@
 
 <p>
 In the Recycpoly study, we investigate whether a digital platform aided 
-by various information stimuli can incentivize people to participate in a 
-decentralized waste management manner as an alternative to such centralized 
+by various information stimuli can incentivize people to participate in
+decentralized waste management as an alternative to centralized
 services. The aim is to explore whether and under which conditions this 
 digital, decentralized interface scheme might be a sustainable alternative 
 to central services and harness the support of the public.
 </p>
 
 <p>
-To achieve this, we will ask you to play an online game which requires making 
-decisions about daily solid waste handling given a timed environment. There will 
-be two separate roles to be assumed (urban consumer or UC, and carrier-hauler or CH), which 
-will be randomly assigned to you, and further gameplay information 
-retrieval might be available. The UC roles generate waste on each round/day and the CH roles 
-handle it if possible. As a UC you automatically pay a default survival cost of supplies, through 
-which you generate the waste. This cost drops the more you dispose through the decentralized waste 
-handling alternative.
+In this study, you make decisions about daily solid waste handling given a timed environment. There will
+be two separate roles (urban consumer or UC, and carrier-hauler or CH), which
+will be randomly assigned. The UC roles generate waste on each round/day and the CH roles
+handle it if possible. As a UC you automatically pay a default survival cost of supplies, through
+which you generate the waste. <b>This cost of survival drops the more UCs handle waste through the decentralized platform.</b>
 </p>
 
 <p>
 Your decisions, depending on your role, consist of the following:
 <ul>
-  <li>UC</li>
+  <li>UC (urban consumer)</li>
   <ul>
-    <li>How many items to be stored</li>
-    <li>How many items to be pushed to the decentralized platform to be exchanged with an available partner</li>
-    <li>The desirable selling price per item pushed</li>
-    <li>How many items to be disposed centrally (e.g. through municipal services)</li>
+    <li>How many items to store</li>
+    <li>How many items to push to the decentralized platform for selling</li>
+    <li>The minimum acceptable selling price per item pushed</li>
   </ul>
-  <li>CH</li> 
+  <li>CH (carrier-hauler)</li>
   <ul>
-    <li>How many items to be bought from those pushed to the decentralized platform by candidate UC partners</li>
-    <li>The desirable buying price per item to be bought</li>
-    <li>How many items from the ones bought to be sold to recycling entities (the greater the selling quantity, the greater the selling price per item)</li>
+    <li>How many items to buy from those pushed to the decentralized platform by candidate UC partners</li>
+    <li>The maximum acceptable buying price per item to be bought</li>
+    <li>Whether to sell the items bought to recycling entities or to store them</li>
   </ul>
 </ul> 
 
-All you need to do is insert the appopriate number in the corresponding fields and click "next" for your actions to be
+All you need to do is insert the appropriate number in the corresponding fields and click "next" for your actions to be
 recorded. Note that you need to specify explicitly an action for all the items available for handling per round. 
-All the data you need to figure your status so as to make an informed decision will be available on the page 
-in question. Be mindful that there will be a penalty if no decision takes 
+All the data you need to make an informed decision will be available on the respective page. Be mindful that there will be a penalty if no decision takes
 place in the allotted time. You will have some trial rounds to familiarize yourself 
 with the game in the beginning.
 </p>
@@ -68,7 +63,7 @@ with the game in the beginning.
 {{ endif }}
 
 <h2>
-  You role is {{ player.role_own }}.
+  Your role is {{ player.role_own }}.
 </h2>
 
 <br>
