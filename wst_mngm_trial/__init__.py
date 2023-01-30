@@ -129,7 +129,7 @@ class GroupWaitPage(WaitPage):
 
 class UniversalDays(Page):
     form_model = 'player'
-    timeout_seconds = Constants.GlobalTimeout
+    #timeout_seconds = Constants.GlobalTimeout
     # form_fields = ['actionSUC', 'actionPP', 'actionD', 'WstType']  # the action set
 
     @staticmethod
@@ -137,6 +137,13 @@ class UniversalDays(Page):
         if player.role_own == "UC":  # UC survival costs' deductions from balance
             items_to_handle = player.participant.store + Constants.g
             return dict(items_to_handle=items_to_handle, Min=-items_to_handle, SurvivalCosts=-player.payoff)
+
+
+    @staticmethod
+    def js_vars(player: Player):
+        if player.role_own == "UC":
+            items_to_handle = player.participant.store + Constants.g
+            return dict(items_to_handle=items_to_handle)
 
 
     @staticmethod

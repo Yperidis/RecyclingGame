@@ -211,9 +211,11 @@ class UniversalDays(Page):
 
     @staticmethod
     def js_vars(player: Player):
-        return dict(
-            treatmentPopUp=player.group.treatmentPopUp
-        )
+        if player.role_own == "UC":
+            items_to_handle = player.participant.store + Constants.g
+            return dict(items_to_handle=items_to_handle, treatmentPopUp=player.group.treatmentPopUp)
+        else:
+            return dict(treatmentPopUp=player.group.treatmentPopUp)
 
 
 class DetailedGamePlayInstructions(Page):

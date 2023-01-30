@@ -67,25 +67,25 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
 {{ endcomment }}
 
 {{ if player.role_own == "UC" }}
-  {{ formfield 'actionSUC' }}
-  {{ formfield 'actionPP' }}
+  <p>How many items do you want to push to the platform?</p>
+  <div class="slidecontainer">
+    <input type="range" id="item_handling" min=0 class="slider" value="0">
+    <p>
+      <span id="items_pushed">&nbsp;</span><br>
+      <span id="items_stored">&nbsp;</span></p>
+  </div>
+  <input type="hidden" id="actionSUC" name="actionSUC" value="0">
+  <input type="hidden" id="actionPP" name="actionPP" value="0">
   {{ formfield 'priceUC' }}
   {{ comment }}
-  {{ formfield 'actionD' }}
+    {{ formfield 'actionSUC' }}
+    {{ formfield 'actionPP' }}
+    {{ formfield 'actionD' }}
   {{ endcomment }}
 {{ else }}
   {{ formfield 'actionBCH' }}
   {{ formfield 'priceCH' }}
 {{ endif }}
-
-{{ comment }}
-<div class="slidecontainer">
-  {{ if player.role_own == 'UC' }}
-    <input type="range" id="items_to_handle1" name="items_to_handle" min={{ Min }} max={{ items_to_handle }} class="slider"> 
-    <p>Value: <span id="items_to_handle2"></span></p>
-  {{ endif }}
-</div>
-{{ endcomment }}
 
 {{ next_button }}
 
@@ -143,7 +143,6 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
         z-index: 11;
         text-align: center;
     }
-/*
     .slidecontainer {
       width: 100%;
     }
@@ -176,7 +175,7 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
       border-radius: 50%;
       background: #0d6efd;
       cursor: pointer;
-    }*/   
+    }
 </style>
 {{ endblock }}
 
@@ -185,6 +184,13 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
 <script>
   let treatmentPopUp = js_vars.treatmentPopUp;
 
+  let itemsToHandle = js_vars.items_to_handle;
+  let itemsSlider = document.getElementById("item_handling");
+  let itemsStored = document.getElementById("items_stored");
+  let itemsPushed = document.getElementById("items_pushed");
+  let decisionStore = document.getElementById("actionSUC");
+  let decisionPush = document.getElementById("actionPP");
+
   window.onload = function() {
     if (treatmentPopUp) {
       setTimeout(function() {
@@ -192,7 +198,25 @@ Learn <a href="{{ static 'wst_mngm_main/DetailedGamePlayInstructions.html' }}" t
         document.getElementById("popupBox").style.display = "block";
         }, 2*1000);
     }
+    itemsSlider.max = itemsToHandle;
   };
+
+  itemsSlider.oninput = function() {
+    let choice = this.value;
+    decisionPush.value = choice;
+    decisionStore.value = itemsToHandle - choice;
+    if (choice === 1) {
+      itemsPushed.innerHTML = "You push 1 item to the platform.";
+    } else {
+      itemsPushed.innerHTML = "You push " + choice + " items to the platform.";
+    }
+    if (itemsToHandle - choice === 1) {
+      itemsStored.innerHTML = "You store 1 item.";
+    } else {
+      itemsStored.innerHTML = "You store " + (itemsToHandle - choice) + " items.";
+    }
+  }
+
 /*
   var slider = document.getElementById("items_to_handle1");
   var output = document.getElementById("items_to_handle2");
