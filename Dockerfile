@@ -1,18 +1,38 @@
-FROM Ubuntu:20.04
+# Base image
+FROM ubuntu:20.04
 
-RUN apt-get -y update && apt-get install python3-pip git 
-RUN pip install otree
-RUN python3 -m venv venv_otree
-RUN source ~/venv_otree/bin/activate
+# Prevent tzdata from prompting during install
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN pip --no-cache-dir install -U pip
+# System dependencies
+RUN apt-get update && apt-get install -y \
+    python3.8 \
+    python3.8-dev \
+    python3.8-tk \
+    python3-pip \
+    build-essential \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+# Make python3.8 the default python
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
 
-RUN pip --no-cache-dir install -r requirements.txt
+# Upgrade pip
+RUN python -m pip install --upgrade pip
 
-RUN useradd --create-home server -s /bin/bash
+# Install Python dependencies
+RUN pip install \
+    otree==5.7.2
 
-COPY . /opt/source-code
+# Set working directory
+WORKDIR /app
 
-ENTRYPOINT RECYCPOLY_APP=/opt/source-code otree devserver
+# Copy project files
+COPY . /app
+
+# Expose oTree default port
+EXPOSE 8000
+
+# Default command
+CMD ["otree", "devserver", "0.0.0.0:8000"]
